@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>An Intuitive Explanation of ROC and AUC | Mochen’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="An Intuitive Explanation of ROC and AUC" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="For students who are learning the basics of Machine Learning, one of the most challenging topics is the ROC curve and the AUC measure of a classifier. While students may be able to mechanically remember how to draw the ROC curve, they often do not fully understand why it is done that way. Similarly, while students know that AUC is the area under the ROC curve, it is not easy to understand why AUC measures the “the probability that a classifier will rank a randomly chosen positive instance higher than a randomly chosen negative one” (Wikipedia). The goal of this post is to provide an intuitive explanation for the two “why” questions. More specifically, I want to" />
+<meta property="og:description" content="For students who are learning the basics of Machine Learning, one of the most challenging topics is the ROC curve and the AUC measure of a classifier. While students may be able to mechanically remember how to draw the ROC curve, they often do not fully understand why it is done that way. Similarly, while students know that AUC is the area under the ROC curve, it is not easy to understand why AUC measures the “the probability that a classifier will rank a randomly chosen positive instance higher than a randomly chosen negative one” (Wikipedia). The goal of this post is to provide an intuitive explanation for the two “why” questions. More specifically, I want to" />
+<link rel="canonical" href="https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2021/11/23/ROC-AUC.html" />
+<meta property="og:url" content="https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2021/11/23/ROC-AUC.html" />
+<meta property="og:site_name" content="Mochen’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-11-23T00:00:00-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="An Intuitive Explanation of ROC and AUC" />
+<script type="application/ld+json">
+{"url":"https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2021/11/23/ROC-AUC.html","@type":"BlogPosting","headline":"An Intuitive Explanation of ROC and AUC","dateModified":"2021-11-23T00:00:00-06:00","datePublished":"2021-11-23T00:00:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2021/11/23/ROC-AUC.html"},"description":"For students who are learning the basics of Machine Learning, one of the most challenging topics is the ROC curve and the AUC measure of a classifier. While students may be able to mechanically remember how to draw the ROC curve, they often do not fully understand why it is done that way. Similarly, while students know that AUC is the area under the ROC curve, it is not easy to understand why AUC measures the “the probability that a classifier will rank a randomly chosen positive instance higher than a randomly chosen negative one” (Wikipedia). The goal of this post is to provide an intuitive explanation for the two “why” questions. More specifically, I want to","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/mochenyangblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mochenyang.github.io/mochenyangblog/feed.xml" title="Mochen's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/mochenyangblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/mochenyangblog/">Mochen&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/mochenyangblog/search/">Search</a><a class="page-link" href="/mochenyangblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">An Intuitive Explanation of ROC and AUC</h1><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-11-23T00:00:00-06:00" itemprop="datePublished">
+        Nov 23, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      9 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#machine-learning">machine-learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#exposition">exposition</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#a-concrete-example">A Concrete Example</a></li>
+<li class="toc-entry toc-h2"><a href="#the-roc-curve">The ROC Curve</a></li>
+<li class="toc-entry toc-h2"><a href="#the-auc-measure">The AUC Measure</a></li>
+<li class="toc-entry toc-h2"><a href="#concluding-remarks">Concluding Remarks</a></li>
+</ul><p>For students who are learning the basics of Machine Learning, one of the most challenging topics is the ROC curve and the AUC measure of a classifier. While students may be able to mechanically remember how to draw the ROC curve, they often do not fully understand <em>why</em> it is done that way. Similarly, while students know that AUC is the area under the ROC curve, it is not easy to understand <em>why</em> AUC measures the “the probability that a classifier will rank a randomly chosen positive instance higher than a randomly chosen negative one” (<a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic#Probabilistic_interpretation">Wikipedia</a>). The goal of this post is to provide an intuitive explanation for the two “why” questions. More specifically, I want to</p>
+
+<ol>
+  <li>use a concrete example to walk through how the ROC curve is created, which leads to an intuitive understanding of what the ROC curve is actually trying to visualize;</li>
+  <li>provide a visual “proof” for the meaning of the AUC measure, without relying on any formal mathematical derivations.</li>
+</ol>
+
+<h2 id="a-concrete-example">
+<a class="anchor" href="#a-concrete-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Concrete Example</h2>
+
+<p>For concreteness, let’s consider a binary classification problem where the outcome is either Positive ($P$) or Negative ($N$). Suppose a classifier has made the following predictions (more specifically, the predicted probabilities of being in the $P$ class) on a validation dataset of 10 records:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Actual Class Label</th>
+      <th>Predicted Probability of $P$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>$P$</td>
+      <td>0.99</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>$P$</td>
+      <td>0.98</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>$N$</td>
+      <td>0.96</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>$N$</td>
+      <td>0.90</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>$P$</td>
+      <td>0.88</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>$N$</td>
+      <td>0.87</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>$P$</td>
+      <td>0.85</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>$P$</td>
+      <td>0.80</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>$N$</td>
+      <td>0.70</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>$P$</td>
+      <td>0.65</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Note that this is meant to be just an example – there’s nothing inherently special about the values of actual outcomes or predicted probabilities, and the intuitions explained later are generally applicable.</p>
+
+<h2 id="the-roc-curve">
+<a class="anchor" href="#the-roc-curve" aria-hidden="true"><span class="octicon octicon-link"></span></a>The ROC Curve</h2>
+
+<p>The ROC curve of a classifier lives on a two-dimensional plot, typically with False Positive Rate (FPR) as the $x$-axis and True Positive Rate (TPR) as the $y$-axis. If you are more familiar with the precision / recall terminologies, the False Positive Rate is equivalent to $1-Recall_N$ and the True Positive Rate is equivalent to $Recall_P$.</p>
+
+<p>Mechanically, the ROC curve is constructed by calculating pairs of (FPR, TPR) for different prediction cutoff values, and plot them on a graph. It is convenient to think about a process where you start with a very high cutoff value, gradually reduce it, and calculate / plot (FPR, TPR) along the way. This is also why the table above has been ordered by the predicted probabilities (from high to low). So, let’s do this step-by-step for the above concrete example (and the ROC curve is provided at the end).</p>
+
+<ul>
+  <li>[Step 1] If you pick a cutoff value higher than 0.99, no record will be predicted as $P$ and all 10 records will be predicted as $N$. This results in a TPR = 0 and FPR = 0;</li>
+  <li>[Step 2] If you pick a cutoff value between 0.99 and 0.98, record 1 will be predicted as $P$ and records 2-10 will be predicted as $N$. This results in TPR = 1/6 and FPR = 0 (<strong>because record 1 is in $P$ and your classifier correctly predicts that</strong>);</li>
+  <li>[Step 3] If you pick a cutoff value between 0.98 and 0.96, records 1-2 will be predicted as $P$ and records 3-10 will be predicted as $N$. This results in TPR = 2/6 and FPR = 0;</li>
+  <li>[Step 4] If you pick a cutoff value between 0.96 and 0.90, records 1-3 will be predicted as $P$ and records 4-10 will be predicted as $N$. This results in TPR = 1/6 and FPR = 1/4 (<strong>because record 3 is in fact $N$, which means your classifier has 1 false positive prediction</strong>);</li>
+  <li>…</li>
+  <li>[Step 10] If you pick a cutoff value between 0.70 and 0.65, records 1-9 will be predicted as $P$ and record 10 will be predicted as $N$. This results in TPR = 5/6 and FPR = 1;</li>
+  <li>[Step 11] If you pick a cutoff value below 0.65, all records will be predicted as $P$ and no record will be predicted as $N$. This results in TPR = 1 and FPR = 1.</li>
+</ul>
+
+<p><img src="/images/roc_auc/ROC.png" alt="ROC" style="zoom: 33%;"></p>
+
+<p>Having walked through the above process of drawing the ROC curve, you may realize two important things:</p>
+
+<ol>
+  <li>It doesn’t really matter which specific cutoff values you choose. Essentially, you are going through the validation dataset from top to bottom (ranked based on predicted probability of being in $P$), one record at a time.</li>
+  <li>As you travel from top to bottom, looking at the actual outcome labels: if you hit a $P$, it means that the classifier would produce a true positive prediction, and the ROC curve would <strong>go up</strong>; if you hit an $N$, it means that the classifier would produce a false positive prediction, and the ROC curve would <strong>go right</strong>.</li>
+</ol>
+
+<p>The second point is, in my opinion, a very useful intuition to have about the ROC curve, because it offers an intuitive understanding of what the ROC curve is visualizing $\rightarrow$ the performance of a classifier in terms of <strong>its ability to rank positive records ahead of negative ones</strong> (based on predicted probabilities of being positive). Why? Because the more positive records ranked ahead of negative ones, the more your ROC curve can go up without going right (i.e., the curve would occupy more space in the upper-left corner).</p>
+
+<h2 id="the-auc-measure">
+<a class="anchor" href="#the-auc-measure" aria-hidden="true"><span class="octicon octicon-link"></span></a>The AUC Measure</h2>
+
+<p>Based on the above intuition of the ROC curve, we can already derive a qualitative interpretation of the area under the ROC curve, or AUC. A larger AUC indicates that the ROC curve is able to go up for more steps before it needs to go right, which means that more positive records are ranked ahead of negative ones.</p>
+
+<p>It turns out that AUC also has a very nice quantitative interpretation, i.e., the probability that a classifier will rank a randomly chosen positive instance higher than a randomly chosen negative one. However, it is not immediately clear why the area under the ROC curve maps nicely into this very particular probability. Below, I offer a visual “proof” of this fact.</p>
+
+<p>To begin, it would be easier if we scale the $x$-axis and $y$-axis of the ROC curve by the number of negative and positive records. Doing so doesn’t change the ROC curve at all - it simply converts all the tick marks on the two axes into integers for convenience. In particular, suppose there are $M_P$ number of positive records and $M_N$ number of negative records, then the marks on the $x$-axis are scaled from ${0,\frac{1}{M_N},\frac{2}{M_N},\ldots, 1}$ into ${0,1,2,\ldots, M_N}$, and the marks on the $y$-axis are scaled from ${0,\frac{1}{M_P},\frac{2}{M_P},\ldots, 1}$ into ${0,1,2,\ldots, M_P}$. In our example, $M_P=6$ and $M_N=4$ and the scaled ROC curve looks like the following. After scaling, the ROC space is sliced up into 24 ($=4 \times 6$) cells, each having an area of 1 - this layout will make it convenient to describe the visual proof.</p>
+
+<p><img src="/images/roc_auc/AUC.png" alt="AUC" style="zoom: 33%;"></p>
+
+<p>Here comes the visual proof. First, think about record #1, which is in class $P$, that causes the ROC curve to jump up from $(0,0)$ to $(0,1)$. Notice that it has four cells, shaded in blue, to its right. If you recall the intuition we have developed from drawing the ROC curve, this observation means that <strong>there are precisely 4 records in class $N$ that rank lower than this $P$ record</strong>. Why? Because the ROC curve needs to move right 4 times before it hits the right boundary. Put differently, the area of the blue region (which is 4) represents <strong>the number of ways to pick a record in class $N$ such that it ranks lower than this $P$ record</strong>.</p>
+
+<p>More importantly, the same way of thinking applies to each $P$ record. Take the third record in $P$ (which is record #5 in our table) as an example, it has 2 cells to its right, shaded in green. That simply means there are 2 ways to pick a record in class $N$ such that it ranks lower than this $P$ record.</p>
+
+<p>As a result, the area under the ROC curve, which is the same as the area of all the shaded cells, amounts to the <strong>total number of ways to pick a record in class $N$ such that it ranks lower than each particular $P$ record</strong>. Now, keep in mind that the area of the entire ROC space (i.e., 24) is simply the total number of ways to pick a pair of $P$ record and $N$ record, you will see that the de-scaled AUC (i.e., area of the shaded region divided by the total area) would then represent the <strong>probability</strong> of choosing a pair of $P$ record and $N$ record and having the $P$ record rank higher than the $N$ record.</p>
+
+<h2 id="concluding-remarks">
+<a class="anchor" href="#concluding-remarks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Concluding Remarks</h2>
+
+<p>By walking through a concrete example, I hope to have articulated the intuitions behind the ROC curve and the AUC measure. To conclude, I want to share two remarks that appear interesting to me personally.</p>
+
+<ol>
+  <li>Although students rarely need to draw the ROC curve by hand (which can be highly cumbersome for large datasets), doing so for a tiny example is still useful for building up the intuition. The game-like procedure, where the curve moves up when you hit $P$ and moves right when you hit $N$, nicely reflects why the ROC curve captures a classifier’s performance in <em>ranking</em> data based on predicted probabilities.</li>
+  <li>For students who are familiar with calculus, it might be tempting to try to prove the probabilistic interpretation of AUC by doing (Riemann-style) integration. While it is certainly feasible, I find it more intuitive to think about it not as the area <em>under</em> the curve, but instead as the area <em>to the right</em> of the curve (in other words, think about a Lebesgue-style integration). Mathematically, they are equivalent, but the latter seems to be easier to wrap one’s head around.</li>
+</ol>
+
+  </div><a class="u-url" href="/mochenyangblog/machine-learning/exposition/2021/11/23/ROC-AUC.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/mochenyangblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/mochenyangblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/mochenyangblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A blog for research and expositional articles.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
