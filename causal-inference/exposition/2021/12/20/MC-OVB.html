@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Multicollinearity or Omitted Variable Bias? Answers to a Seeming Conundrum | Mochen’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Multicollinearity or Omitted Variable Bias? Answers to a Seeming Conundrum" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In statistics or causal inference courses, students are usually taught a number of “threats” they need to watch out for when running regression analyses, such as multicollinearity, omitted variable bias, reverse causality, measurement error, selection bias, etc. They often form the impression that the presence of these threats will “bias” their results (more specifically, regression estimations). In this blog post, I discuss a seeming conundrum involving multicollinearity and omitted variable bias." />
+<meta property="og:description" content="In statistics or causal inference courses, students are usually taught a number of “threats” they need to watch out for when running regression analyses, such as multicollinearity, omitted variable bias, reverse causality, measurement error, selection bias, etc. They often form the impression that the presence of these threats will “bias” their results (more specifically, regression estimations). In this blog post, I discuss a seeming conundrum involving multicollinearity and omitted variable bias." />
+<link rel="canonical" href="https://mochenyang.github.io/mochenyangblog/causal-inference/exposition/2021/12/20/MC-OVB.html" />
+<meta property="og:url" content="https://mochenyang.github.io/mochenyangblog/causal-inference/exposition/2021/12/20/MC-OVB.html" />
+<meta property="og:site_name" content="Mochen’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-12-20T00:00:00-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Multicollinearity or Omitted Variable Bias? Answers to a Seeming Conundrum" />
+<script type="application/ld+json">
+{"url":"https://mochenyang.github.io/mochenyangblog/causal-inference/exposition/2021/12/20/MC-OVB.html","headline":"Multicollinearity or Omitted Variable Bias? Answers to a Seeming Conundrum","dateModified":"2021-12-20T00:00:00-06:00","datePublished":"2021-12-20T00:00:00-06:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mochenyang.github.io/mochenyangblog/causal-inference/exposition/2021/12/20/MC-OVB.html"},"description":"In statistics or causal inference courses, students are usually taught a number of “threats” they need to watch out for when running regression analyses, such as multicollinearity, omitted variable bias, reverse causality, measurement error, selection bias, etc. They often form the impression that the presence of these threats will “bias” their results (more specifically, regression estimations). In this blog post, I discuss a seeming conundrum involving multicollinearity and omitted variable bias.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/mochenyangblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mochenyang.github.io/mochenyangblog/feed.xml" title="Mochen's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/mochenyangblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/mochenyangblog/">Mochen&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/mochenyangblog/search/">Search</a><a class="page-link" href="/mochenyangblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multicollinearity or Omitted Variable Bias? Answers to a Seeming Conundrum</h1><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-12-20T00:00:00-06:00" itemprop="datePublished">
+        Dec 20, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      6 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#causal-inference">causal-inference</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#exposition">exposition</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#whats-the-problem">What’s the Problem?</a></li>
+<li class="toc-entry toc-h2"><a href="#nature-of-the-problem">Nature of the Problem</a></li>
+<li class="toc-entry toc-h2"><a href="#so-whats-the-answer">So What’s the Answer?</a></li>
+<li class="toc-entry toc-h2"><a href="#concluding-remarks">Concluding Remarks</a></li>
+</ul><p>In statistics or causal inference courses, students are usually taught a number of “threats” they need to watch out for when running regression analyses, such as multicollinearity, omitted variable bias, reverse causality, measurement error, selection bias, etc. They often form the impression that the presence of these threats will “bias” their results (more specifically, regression estimations). In this blog post, I discuss a seeming conundrum involving multicollinearity and omitted variable bias.</p>
+
+<h2 id="whats-the-problem">
+<a class="anchor" href="#whats-the-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>What’s the Problem?</h2>
+
+<p>Suppose you want to explore the effect of $X$ on $Y$ by considering the following simple linear regression model (technically speaking, the population regression equation):
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mi>X</mi><mo>+</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">Y=\beta_0+ \beta_1 X + \varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">Y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">ε</span></span></span></span>
+For expositional simplicity, here I only consider a single independent variable. Adding additional control variables does not fundamentally change the discussion. Now, suppose another variable, $Z$, also has an effect on $Y$. More importantly, $Z$ is correlated with $X$, and let’s assume that the degree of correlation is not trivially small to be ignored. The question is: <strong>should you include $Z$ in the regression model or not?</strong> This seemingly innocent question leads to the following conundrum:</p>
+
+<ul>
+  <li>If you include $Z$ in the regression, you have a multicollinearity problem, because $Corr(X,Z)&gt;0$ and the correlation is non-trivial (by assumption);</li>
+  <li>If you don’t include $Z$ in the regression, you have an omitted variable bias problem, because $Z$, by definition a part of the error term, is correlated with $X$. I.e., $Corr(\varepsilon,X)\neq 0$.</li>
+</ul>
+
+<h2 id="nature-of-the-problem">
+<a class="anchor" href="#nature-of-the-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Nature of the Problem</h2>
+
+<p>At first sight, this seems like a real conundrum, and one is forced to choose between two evils. To resolve it, it is important to first realize that <strong>multicollinearity and omitted variable bias are two issues with very different nature</strong>. Thinking they would both “bias” the estimation results is in fact a misconception.</p>
+
+<p>The nature of the omitted variable problem is that it indeed biases coefficient estimations. In this case, roughly speaking:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">(</mo><mover accent="true"><msub><mi>β</mi><mn>1</mn></msub><mo stretchy="true">undefined</mo></mover><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>C</mi><mi>o</mi><mi>v</mi><mo stretchy="false">(</mo><mi>X</mi><mo separator="true">,</mo><mi>Y</mi><mo stretchy="false">)</mo></mrow><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>=</mo><msub><mi>β</mi><mn>1</mn></msub><mo>+</mo><mfrac><mrow><mi>C</mi><mi>o</mi><mi>v</mi><mo stretchy="false">(</mo><mi>X</mi><mo separator="true">,</mo><mi>ε</mi><mo stretchy="false">)</mo></mrow><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></mrow></mfrac><mo mathvariant="normal">≠</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\mathbb{E}(\widehat{\beta_1}) = \frac{Cov(X,Y)}{Var(X)} = \beta_1 + \frac{Cov(X,\varepsilon)}{Var(X)} \neq \beta_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.18444em;vertical-align:-0.25em;"></span><span class="mord mathbb">E</span><span class="mopen">(</span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9344399999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="svg-align" style="top:-3.69444em;"><span class="pstrut" style="height:3em;"></span><span style="height:0.24em;"><svg width="100%" height="0.24em" viewbox="0 0 1062 239" preserveaspectratio="none"><path d="M529 0h5l519 115c5 1 9 5 9 10 0 1-1 2-1 3l-4 22
+c-1 5-5 9-11 9h-2L532 67 19 159h-2c-5 0-9-4-11-9l-5-22c-1-6 2-12 8-13z"></path></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.53em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">Va</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.22222em;">Y</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.53em;vertical-align:-0.52em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">Va</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.07847em;">X</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">ε</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.52em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="inner"><span class="mord"><span class="mrel"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>
+In other words, estimation of the parameter of interest, $\beta_1$, does not equal to its true value in expectation. Put differently, even if you have the luxury of having multiple independent samples (on which you can obtain multiple estimations of $\beta_1$), your averaged estimation of $\beta_1$ would still be wrong.</p>
+
+<p>In comparison, multicollinearity actually does <em>not</em> bias your estimates, it inflates the standard error estimation. It means that your estimation of $\beta_1$, while being correct in expectation, is less precise given a fixed sample. Proving the unbiasedness of estimation under multicollinearity takes more work (specifically, relies on the <a href="https://en.wikipedia.org/wiki/Frisch%E2%80%93Waugh%E2%80%93Lovell_theorem">Frisch–Waugh–Lovell theorem</a> theorem that students typically only encounter in Ph.D. level econometrics course). Therefore, I will use numeric simulations to demonstrate this.</p>
+
+<p>Specifically, I will simulate 5000 data points for the following regression specification:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mn>1</mn><mo>+</mo><mn>2</mn><mo>×</mo><mi>X</mi><mo>+</mo><mn>0.5</mn><mo>×</mo><mi>Z</mi><mo>+</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">Y=1+2 \times X + 0.5 \times Z + \varepsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">Y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">0.5</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal">ε</span></span></span></span>
+where $X \sim N(0,1)$ is the key independent variable of interest; $\varepsilon \sim N(0,0.1^2)$ is the (exogenous) model error term; and $Z=0.6 \times X+N(0,0.5^2)$ is the “confounder” variable. Simple calculation will show that $Corr(X,Z) \approx 0.77$, so if $Z$ is included in the regression with $X$, there is nontrivial multicollinearity. Meanwhile, because $Z$ is indeed in the data generation process of $Y$, not having it in the regression would lead to non-trivial omitted variable bias. The simulation will be repeated for 1000 times (as if I could draw 1000 independent samples, each having 5000 data points, from certain population). The replicable code is included as follows.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">set.seed</span><span class="p">(</span><span class="m">123456</span><span class="p">)</span><span class="w">
+</span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5000</span><span class="w">
+</span><span class="n">N_iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span><span class="c1"># Iterate through 1000 simulation runs</span><span class="w">
+</span><span class="c1"># Store the coefficient estimate on X in a data frame</span><span class="w">
+</span><span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">beta_mc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="w"> </span><span class="n">N_iter</span><span class="p">),</span><span class="w"> </span><span class="n">beta_ovb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">rep</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="w"> </span><span class="n">N_iter</span><span class="p">))</span><span class="w">
+</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="n">N_iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="c1"># Simulate independent variable X</span><span class="w">
+    </span><span class="n">X</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="w">
+    </span><span class="c1"># Simulate model error term eps</span><span class="w">
+    </span><span class="n">eps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.1</span><span class="p">)</span><span class="w">
+    </span><span class="c1"># Simulate Z. Corr(Z,X) is around 0.77</span><span class="w">
+    </span><span class="n">Z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.6</span><span class="o">*</span><span class="n">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5</span><span class="p">)</span><span class="w">
+    </span><span class="c1"># Simulate dependent variable Y</span><span class="w">
+    </span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">2</span><span class="o">*</span><span class="n">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">0.5</span><span class="o">*</span><span class="n">Z</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">eps</span><span class="w">
+
+    </span><span class="c1"># Have Z in the regression (multicollinearity)</span><span class="w">
+    </span><span class="n">model_mc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Z</span><span class="p">)</span><span class="w">
+    </span><span class="c1"># Do not have Z in the regression (omitted variable bias)</span><span class="w">
+    </span><span class="n">model_ovb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">X</span><span class="p">)</span><span class="w">
+
+    </span><span class="c1"># store the coefficient on X from the two models</span><span class="w">
+    </span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">model_mc</span><span class="p">)[</span><span class="s2">"X"</span><span class="p">]</span><span class="w">
+    </span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">model_ovb</span><span class="p">)[</span><span class="s2">"X"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Next, the empirical distribution of coefficient estimates on $X$ is plotted.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w">
+</span><span class="n">ggplot</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">beta_mc</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_density</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">labs</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Coefficient on X"</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Multicollinearity"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w">
+
+</span><span class="n">ggplot</span><span class="p">(</span><span class="n">results</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">beta_ovb</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_density</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">labs</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Coefficient on X"</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Omitted Variable Bias"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="G:%5CMy%20Drive%5CBlog%5CMulticollinearity%20or%20OVB%5CRplot.svg" alt="Rplot"></p>
+
+<p>We can see that: (1) when $Z$ is included in the regression, coefficient of $X$ remains unbiased (centered around 2) despite the multicollinearity issue; (2) when $Z$ is excluded from the regression, coefficient of $X$ is biased (centered around 2.3).</p>
+
+<h2 id="so-whats-the-answer">
+<a class="anchor" href="#so-whats-the-answer" aria-hidden="true"><span class="octicon octicon-link"></span></a>So What’s the Answer?</h2>
+
+<p>The simulation seems to suggest that we should <em>always</em> include $Z$ in the regression, because doing so does not really lead to any bias but not doing so will bias the estimations. The conclusion, in my opinion, is more nuanced than that.</p>
+
+<p>In a sense, I argue that this conundrum isn’t actually a true conundrum (hence the “seeming” conundrum in the article title), and its resolution lies in thinking about <strong>“is $Z$ really a variable that affects $Y$ in addition to $X$”?</strong></p>
+
+<ul>
+  <li>If $Z$ really is a determinant of $Y$ in addition to $X$, just like what we have simulated (i.e., $Z$ is a part of the data generation process of $Y$), then omitting $Z$ causes bias, and it’s probably worth including $Z$ in the regression. This is especially true if one has a sufficiently large sample, which makes the variance-inflation effect of multicollinearity relatively tolerable (from a hypothesis testing point of view);</li>
+  <li>However, if $Z$ does not provide any meaningful information beyond $X$, then it shouldn’t be in the regression. As an example, think about the case of perfect multicollinearity (i.e., $Z$ is simply a linear function of $X$ such as $Z = 0.6 \times X$), then $Z$ does not provide any extra information beyond $X$ and should be excluded from the regression. Importantly, excluding $Z$ does NOT cause any omitted variable issue because <strong>$Z$ is not part of the regression to begin with</strong>.</li>
+  <li>In practice, since the data generation process of $Y$ is almost always unknown (that’s why we are running regressions in the first place), it can be hard to decide precisely whether $Z$ provides any information beyond $X$. At the end of the day, the inclusion or exclusion of variables in regression models should be guided by theory (i.e., think about what $X$ and $Z$ each measures in the particular problem context that’s being analyzed), not purely by empirics / data.</li>
+</ul>
+
+<h2 id="concluding-remarks">
+<a class="anchor" href="#concluding-remarks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Concluding Remarks</h2>
+
+<p>In this post, we start from a conundrum that seems difficult at first, but after understanding the nature of the problem, becomes less of a conundrum. At the end of the day, its resolution depends on a subjective judgement (i.e., whether the potential confounder $Z$ should be considered a determinant of $Y$ or not). This is not uncommon in causal inference and is worth highlighting in my opinion. Although causal inference (and econometrics, for that matter) is often taken to be a highly quantitative field with little room for subjectivity, many practical decisions that one has to make when carrying out actual analyses (e.g., model specification, variable inclusion / exclusion) need to rely on subjective judgement and theoretical argumentation.</p>
+
+  </div><a class="u-url" href="/mochenyangblog/causal-inference/exposition/2021/12/20/MC-OVB.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/mochenyangblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/mochenyangblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/mochenyangblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A blog for research and expositional articles.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
