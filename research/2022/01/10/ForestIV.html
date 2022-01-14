@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>ForestIV | Mochen’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="ForestIV" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Demonstration of the ForestIV Implementation in R" />
+<meta property="og:description" content="Demonstration of the ForestIV Implementation in R" />
+<link rel="canonical" href="https://mochenyang.github.io/mochenyangblog/research/2022/01/10/ForestIV.html" />
+<meta property="og:url" content="https://mochenyang.github.io/mochenyangblog/research/2022/01/10/ForestIV.html" />
+<meta property="og:site_name" content="Mochen’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-10T00:00:00-06:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="ForestIV" />
+<script type="application/ld+json">
+{"url":"https://mochenyang.github.io/mochenyangblog/research/2022/01/10/ForestIV.html","headline":"ForestIV","dateModified":"2022-01-10T00:00:00-06:00","datePublished":"2022-01-10T00:00:00-06:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mochenyang.github.io/mochenyangblog/research/2022/01/10/ForestIV.html"},"description":"Demonstration of the ForestIV Implementation in R","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/mochenyangblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mochenyang.github.io/mochenyangblog/feed.xml" title="Mochen's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/mochenyangblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/mochenyangblog/">Mochen&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/mochenyangblog/search/">Search</a><a class="page-link" href="/mochenyangblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">ForestIV</h1><p class="page-description">Demonstration of the ForestIV Implementation in R</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2022-01-10T00:00:00-06:00" itemprop="datePublished">
+        Jan 10, 2022
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      6 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#research">research</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#forestiv-implementation">ForestIV Implementation</a></li>
+<li class="toc-entry toc-h2"><a href="#a-replicable-demonstration">A Replicable Demonstration</a></li>
+</ul><p>This blog posts describes the <code class="language-plaintext highlighter-rouge">ForestIV</code> R package, an implementation of the <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3339983">ForestIV approach</a> to correct for estimation biases caused by having machine-learning-generated covariates in regression analyses.</p>
+
+<p>To install the package, simply run the following command in R:</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">devtools</span><span class="o">::</span><span class="n">install_github</span><span class="p">(</span><span class="s2">"mochenyang/ForestIV"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The package depends on three external libraries:</p>
+
+<ol>
+  <li>
+<code class="language-plaintext highlighter-rouge">hdm</code>: to perform Lasso-based selection of instrumental variables;</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">AER</code>: to perform 2-stage least-square estimations (for linear regressions);</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ivtools</code>: to perform control function estimations (for GLMs).</li>
+</ol>
+
+<h2 id="forestiv-implementation">
+<a class="anchor" href="#forestiv-implementation" aria-hidden="true"><span class="octicon octicon-link"></span></a>ForestIV Implementation</h2>
+
+<p>The core function of the package is <code class="language-plaintext highlighter-rouge">ForestIV()</code>, which takes the following inputs:</p>
+
+<ol>
+  <li>
+<code class="language-plaintext highlighter-rouge">data_test</code>: A dataframe of the testing data (in a training-testing split) when building the random forest. It must have a column named “actual” that contains the ground truth values, and separate columns that contain each tree’s predictions named “X1”, “X2”, … Note that if you use the <code class="language-plaintext highlighter-rouge">randomForest</code> package to train the random forest model, then the column names will be taken care of automatically.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">data_unlabel</code>: A dataframe of the unlabeled data. It must have separate columns that contain each tree’s predictions named “X1”, “X2”, …</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">control</code>: A character vector of control variable names. Pass an empty vector if there is no control variable.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">method</code>: The method for IV selection. Supported values are “Lasso” for lasso-based selection and “IIV” for the imperfect IV method (forthcoming in our next paper, stay tuned!).</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">iterative</code>: Whether or not to perform iterative IV selection to remove invalid and weak IVs, default to TRUE. This parameter is only relevant when method = “Lasso”.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ntree</code>: Number of trees in the random forest.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">model_unbias</code>: A <code class="language-plaintext highlighter-rouge">lm</code> or <code class="language-plaintext highlighter-rouge">glm</code> object that contains the unbiased regression estimates, typically obtained by running the regression on the labeled data.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">family</code>: Model specification. Same as in the family parameter in glm.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">diagnostic:</code> Whether to output diagnostic correlations for instrument validity and strength. Default to TRUE, which will produce four additional columns in the output, respectively named “pp_abs_before”, “pe_abs_before”, “pp_abs_after” and “pe_abs_after”. The “pp_abs_*” columns contain the average absolute correlation between endogenous covariate and IVs, before and after IV selection. Similarly, the “pe_abs_*”  columns contain the average absolute correlation between the model error term and the IVs, before and after IV selection. If IV selection works properly, one should expect “pp_abs_after” to be higher than “pp_abs_before” (indicating that strong IVs are being selected) and “pe_abs_after” to be lower than “pe_abs_before” (indicating that invalid IVs are being removed).</li>
+</ol>
+
+<p>The output is a dataframe with no more than <code class="language-plaintext highlighter-rouge">ntree</code> number of rows, each corresponding to the ForestIV estimation results where a specific tree is used as the endogenous covariate (and other trees as candidate IVs).</p>
+
+<h2 id="a-replicable-demonstration">
+<a class="anchor" href="#a-replicable-demonstration" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Replicable Demonstration</h2>
+
+<p>For demonstration, I replicate a part of the simulations reported in our paper, using the <a href="https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset">Bike Sharing Dataset</a>, which contains 17,379 records of hourly bike rental activities. The machine learning task is to predict (the log of) rental counts based on time, seasonal, and weather features. The following code prepares the dataset.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Replicable Simulation Example with Bike Sharing Dataset</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">ForestIV</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">randomForest</span><span class="p">)</span><span class="w">
+
+</span><span class="c1"># import Bike Sharing data</span><span class="w">
+</span><span class="c1"># removed "instant" (ID), "dteday" (date), and "registered"/"casual" (which simply add up to the outcome variable)</span><span class="w">
+</span><span class="n">Bike</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read.csv</span><span class="p">(</span><span class="s2">"hour.csv"</span><span class="p">,</span><span class="w"> </span><span class="n">stringsAsFactors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">dplyr</span><span class="o">::</span><span class="n">mutate</span><span class="p">(</span><span class="n">lnCnt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">cnt</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">dplyr</span><span class="o">::</span><span class="n">select</span><span class="p">(</span><span class="o">-</span><span class="n">instant</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">dteday</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">registered</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">casual</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">cnt</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Next, let’s train the random forest model. I use 1,000 data points for training, reserve 200 for testing, and the rest 16,379 are treated as unlabeled. After the model is trained, I obtain its predictions both on the testing data and on the unlabeled data.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># parameters for random forest</span><span class="w">
+</span><span class="n">ntree</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">100</span><span class="w">
+</span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nrow</span><span class="p">(</span><span class="n">Bike</span><span class="p">)</span><span class="w">
+</span><span class="n">N_train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1000</span><span class="w">
+</span><span class="n">N_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">200</span><span class="w">
+</span><span class="n">N_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">N_train</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">N_test</span><span class="w">
+
+</span><span class="c1"># need to set the same seed here to fully replicate this demonstration</span><span class="w">
+</span><span class="n">set.seed</span><span class="p">(</span><span class="m">123456</span><span class="p">)</span><span class="w">
+</span><span class="c1"># train random forest</span><span class="w">
+</span><span class="n">train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sample</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="n">nrow</span><span class="p">(</span><span class="n">Bike</span><span class="p">),</span><span class="w"> </span><span class="n">N_train</span><span class="p">)</span><span class="w">
+</span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sample</span><span class="p">((</span><span class="m">1</span><span class="o">:</span><span class="n">nrow</span><span class="p">(</span><span class="n">Bike</span><span class="p">))[</span><span class="o">-</span><span class="n">train</span><span class="p">],</span><span class="w"> </span><span class="n">N_test</span><span class="p">)</span><span class="w">
+</span><span class="n">unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sample</span><span class="p">((</span><span class="m">1</span><span class="o">:</span><span class="n">nrow</span><span class="p">(</span><span class="n">Bike</span><span class="p">))[</span><span class="o">-</span><span class="nf">c</span><span class="p">(</span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">)],</span><span class="w"> </span><span class="n">N_unlabel</span><span class="p">)</span><span class="w">
+</span><span class="n">Bike.rf</span><span class="o">=</span><span class="n">randomForest</span><span class="p">(</span><span class="n">lnCnt</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">.</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Bike</span><span class="p">,</span><span class="w">
+                     </span><span class="n">mtry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">ntree</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ntree</span><span class="p">)</span><span class="w">
+
+</span><span class="c1"># retrieve ground truth and predictions on testing and unlabeled data</span><span class="w">
+</span><span class="c1"># setting "predict.all = TRUE" will produce predictions from each individual tree in the forest</span><span class="w">
+</span><span class="n">actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Bike</span><span class="o">$</span><span class="n">lnCnt</span><span class="w">
+</span><span class="n">pred_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">predict</span><span class="p">(</span><span class="n">Bike.rf</span><span class="p">,</span><span class="w"> </span><span class="n">Bike</span><span class="p">[</span><span class="n">unlabel</span><span class="p">,],</span><span class="w"> </span><span class="n">predict.all</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">indiv_pred_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_unlabel</span><span class="o">$</span><span class="n">individual</span><span class="w">
+</span><span class="n">aggr_pred_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_unlabel</span><span class="o">$</span><span class="n">aggregate</span><span class="w">
+</span><span class="n">pred_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">predict</span><span class="p">(</span><span class="n">Bike.rf</span><span class="p">,</span><span class="w"> </span><span class="n">Bike</span><span class="p">[</span><span class="n">test</span><span class="p">,],</span><span class="w"> </span><span class="n">predict.all</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">indiv_pred_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_test</span><span class="o">$</span><span class="n">individual</span><span class="w">
+</span><span class="n">aggr_pred_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_test</span><span class="o">$</span><span class="n">aggregate</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Next, let’s simulate the second-stage regression, where the ML predictions enter as an independent covariate with measurement error. Same as what we have done in the paper, I simulate a simple linear regression: $Y=1+0.5\times lnCnt + 2 \times control_1 + control_2 + \varepsilon$, where $lnCnt$ is the ground truth values of log rental count, and ${control_1, control_2}$ are two exogenous control variables that follow $Uniform[-10,10]$ and $N(0,10^2)$ respectively. The regression model error term, $\varepsilon$, follows $N(0,2^2)$.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># simulate data for econometric model</span><span class="w">
+</span><span class="n">control1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">runif</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">-10</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="w">
+</span><span class="n">control2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="w">
+</span><span class="n">epsilon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="p">)</span><span class="w">
+</span><span class="n">control</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s2">"control1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"control2"</span><span class="p">)</span><span class="w">
+</span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1.0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">0.5</span><span class="o">*</span><span class="n">actual</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">2.0</span><span class="o">*</span><span class="n">control1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">control2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">epsilon</span><span class="w">
+
+</span><span class="c1"># prepare various data partitions for estimations</span><span class="w">
+</span><span class="n">data_train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Y</span><span class="p">[</span><span class="n">train</span><span class="p">],</span><span class="w"> </span><span class="n">control1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control1</span><span class="p">[</span><span class="n">train</span><span class="p">],</span><span class="w"> </span><span class="n">control2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control2</span><span class="p">[</span><span class="n">train</span><span class="p">],</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">actual</span><span class="p">[</span><span class="n">train</span><span class="p">])</span><span class="w">
+</span><span class="n">data_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">indiv_pred_test</span><span class="p">,</span><span class="w"> </span><span class="n">aggr_pred_test</span><span class="p">,</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">actual</span><span class="p">[</span><span class="n">test</span><span class="p">])</span><span class="w">
+</span><span class="n">data_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Y</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">)],</span><span class="w"> </span><span class="n">control1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control1</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">)],</span><span class="w"> </span><span class="n">control2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control2</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">)],</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">actual</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">)])</span><span class="w">
+</span><span class="n">data_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Y</span><span class="p">[</span><span class="n">unlabel</span><span class="p">],</span><span class="w"> </span><span class="n">control1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control1</span><span class="p">[</span><span class="n">unlabel</span><span class="p">],</span><span class="w"> </span><span class="n">control2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control2</span><span class="p">[</span><span class="n">unlabel</span><span class="p">],</span><span class="w"> </span><span class="n">indiv_pred_unlabel</span><span class="p">,</span><span class="w"> </span><span class="n">aggr_pred_unlabel</span><span class="p">)</span><span class="w">
+
+</span></code></pre></div></div>
+
+<p>Now, let’s estimate the biased regression using the unlabeled data (with predicted $lnCnt$ as covariate) and the unbiased regression using the labeled data. In the biased regression, coefficient on ML-generated covariate is overestimated! In the unbiased regression, coefficient estimates are fine, but the standard errors are expectedly larger (due to smaller sample size).</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># biased regression</span><span class="w">
+</span><span class="n">model_biased</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">aggr_pred_unlabel</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">control1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">control2</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_unlabel</span><span class="p">)</span><span class="w">
+</span><span class="n">summary</span><span class="p">(</span><span class="n">model_biased</span><span class="p">)</span><span class="w">
+</span><span class="c1">#Results:</span><span class="w">
+</span><span class="c1">#                  Estimate Std. Error t value Pr(&gt;|t|)    </span><span class="w">
+</span><span class="c1">#(Intercept)       0.637370   0.062325   10.23   &lt;2e-16 ***</span><span class="w">
+</span><span class="c1">#aggr_pred_unlabel 0.580574   0.013315   43.60   &lt;2e-16 ***</span><span class="w">
+</span><span class="c1">#control1          1.998247   0.002752  726.19   &lt;2e-16 ***</span><span class="w">
+</span><span class="c1">#control2          0.998151   0.001602  623.10   &lt;2e-16 ***</span><span class="w">
+
+</span><span class="c1"># unbiased regression</span><span class="w">
+</span><span class="n">model_unbias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">Y</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">control1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">control2</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_label</span><span class="p">)</span><span class="w">
+</span><span class="n">summary</span><span class="p">(</span><span class="n">model_unbias</span><span class="p">)</span><span class="w">
+</span><span class="c1">#Results:</span><span class="w">
+</span><span class="c1">#            Estimate Std. Error t value Pr(&gt;|t|)    </span><span class="w">
+</span><span class="c1">#(Intercept)  1.05690    0.18596   5.683 1.66e-08 ***</span><span class="w">
+</span><span class="c1">#actual       0.49197    0.03882  12.672  &lt; 2e-16 ***</span><span class="w">
+</span><span class="c1">#control1     2.00336    0.01009 198.565  &lt; 2e-16 ***</span><span class="w">
+</span><span class="c1">#control2     1.00356    0.00586 171.270  &lt; 2e-16 ***</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Finally, let’s run ForestIV estimation.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ForestIV estimation</span><span class="w">
+</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ForestIV</span><span class="p">(</span><span class="n">data_test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_test</span><span class="p">,</span><span class="w"> </span><span class="n">data_unlabel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_unlabel</span><span class="p">,</span><span class="w"> </span><span class="n">control</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control</span><span class="p">,</span><span class="w">
+                  </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Lasso"</span><span class="p">,</span><span class="w"> </span><span class="n">iterative</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span><span class="w"> </span><span class="n">ntree</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ntree</span><span class="p">,</span><span class="w"> </span><span class="n">model_unbias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_unbias</span><span class="p">,</span><span class="w">
+                  </span><span class="n">family</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gaussian</span><span class="p">(</span><span class="n">link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"identity"</span><span class="p">),</span><span class="w"> </span><span class="n">diagnostic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">result</code> is a dataframe with 99 rows (because the procedure failed to find valid and strong IVs for one tree in the random forest). It can be further processed to produce the final estimations. Same as what we have done in the paper, here I report the ForestIV estimates are statistically closest to the unbiased estimates (in the Mean-Squared-Error sense) and also pass the Hotelling test with at 95% level.</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">H_critical</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qchisq</span><span class="p">(</span><span class="m">0.95</span><span class="p">,</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">)</span><span class="w">
+</span><span class="n">coef_unbiased</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">model_unbias</span><span class="p">)</span><span class="w">
+</span><span class="n">result</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">mutate</span><span class="p">(</span><span class="n">bias2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sum</span><span class="p">((</span><span class="nf">c</span><span class="p">(</span><span class="n">beta_1</span><span class="p">,</span><span class="w"> </span><span class="n">beta_2</span><span class="p">,</span><span class="w"> </span><span class="n">beta_3</span><span class="p">,</span><span class="w"> </span><span class="n">beta_4</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">coef_unbiased</span><span class="p">)</span><span class="o">^</span><span class="m">2</span><span class="p">),</span><span class="w">
+         </span><span class="n">variance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">se_1</span><span class="o">^</span><span class="m">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">se_2</span><span class="o">^</span><span class="m">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">se_3</span><span class="o">^</span><span class="m">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">se_4</span><span class="o">^</span><span class="m">2</span><span class="p">,</span><span class="w">
+         </span><span class="n">mse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bias2</span><span class="o">+</span><span class="n">variance</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">arrange</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">filter</span><span class="p">(</span><span class="n">row_number</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">Hotelling</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">H_critical</span><span class="p">)</span><span class="w">
+</span><span class="c1">#Results:</span><span class="w">
+</span><span class="c1">#beta_1	beta_2	beta_3	beta_4</span><span class="w">
+</span><span class="c1">#0.984	0.503	1.998	0.998</span><span class="w">
+</span></code></pre></div></div>
+
+<p>To obtain valid standard error estimates, one can bootstrap the above procedure multiple times. As we show in the paper, the (bootstrapped) standard errors of ForestIV estimates are smaller than those in the unbiased regression. In other words, ForestIV produce less biased point estimates (compared to the biased regression) with higher precision (compared to the unbiased regression).</p>
+
+  </div><a class="u-url" href="/mochenyangblog/research/2022/01/10/ForestIV.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/mochenyangblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/mochenyangblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/mochenyangblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A blog for research and expositional articles.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
