@@ -114,7 +114,7 @@ window.onload = wrap_img;
     <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#forestiv-implementation">ForestIV Implementation</a></li>
 <li class="toc-entry toc-h2"><a href="#a-replicable-demonstration">A Replicable Demonstration</a></li>
-</ul><p>This blog posts describes the <code class="language-plaintext highlighter-rouge">ForestIV</code> R package, an implementation of the <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3339983">ForestIV approach</a> to correct for estimation biases caused by having machine-learning-generated covariates in regression analyses.</p>
+</ul><p>This blog post describes the <code class="language-plaintext highlighter-rouge">ForestIV</code> R package, an implementation of the <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3339983">ForestIV approach</a> to correct for estimation biases caused by having machine-learning-generated covariates in regression analyses.</p>
 
 <p>To install the package, simply run the following command in R:</p>
 
@@ -153,7 +153,7 @@ window.onload = wrap_img;
   <li>
 <code class="language-plaintext highlighter-rouge">model_unbias</code>: A <code class="language-plaintext highlighter-rouge">lm</code> or <code class="language-plaintext highlighter-rouge">glm</code> object that contains the unbiased regression estimates, typically obtained by running the regression on the labeled data.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">family</code>: Model specification. Same as in the family parameter in glm.</li>
+<code class="language-plaintext highlighter-rouge">family</code>: Model specification. Same as the <code class="language-plaintext highlighter-rouge">family</code> parameter in <code class="language-plaintext highlighter-rouge">glm</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">diagnostic:</code> Whether to output diagnostic correlations for instrument validity and strength. Default to TRUE, which will produce four additional columns in the output, respectively named “pp_abs_before”, “pe_abs_before”, “pp_abs_after” and “pe_abs_after”. The “pp_abs_*” columns contain the average absolute correlation between endogenous covariate and IVs, before and after IV selection. Similarly, the “pe_abs_*”  columns contain the average absolute correlation between the model error term and the IVs, before and after IV selection. If IV selection works properly, one should expect “pp_abs_after” to be higher than “pp_abs_before” (indicating that strong IVs are being selected) and “pe_abs_after” to be lower than “pe_abs_before” (indicating that invalid IVs are being removed).</li>
 </ol>
