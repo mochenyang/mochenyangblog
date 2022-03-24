@@ -10,7 +10,7 @@ They say you can learn more from failures than from successes. But that doesn't 
 
 To help articulate my reflection, let me put academic papers into the following 2 by 2 matrix, based on the quality of idea discussed in the paper (i.e., how novel / new the idea is) and the quality of execution (i.e., how rigorous / meticulous is the execution).
 
-<img src="/mochenyangblog/images/rejections/PaperMatrix.PNG" style="zoom:75%;" />
+![PaperMatrix](C:\Users\yang3653\Documents\GitHub\mochenyangblog\images\rejections\PaperMatrix.PNG)
 
 Papers in categories A and D are easy to judge - A-type papers should clearly be accepted and D-type papers should clearly be rejected. However, what happens to papers in categories B and C are not immediately clear and ultimately reflect how journals handle the tradeoff between idea and execution. Our ForestIV paper (in our biased opinion) falls into category B. While it has a very unique idea (the novelty / quality of which has been consistently acknowledged even during the review process), its execution is imperfect, due to the difficulty of theoretically analyzing data-driven machine learning models and procedures. The fact that it has been repeatedly rejected at respected outlets made me understand: **good execution of an incremental idea will have an easier time in today's academic publishing than imperfect execution of a novel idea**.
 
