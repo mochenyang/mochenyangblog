@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Training Word Embeddings | Mochen’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Training Word Embeddings" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A step-by-step illustration of skip-gram and continuous bag-of-words models" />
+<meta property="og:description" content="A step-by-step illustration of skip-gram and continuous bag-of-words models" />
+<link rel="canonical" href="https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2022/07/12/Word-Embedding.html" />
+<meta property="og:url" content="https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2022/07/12/Word-Embedding.html" />
+<meta property="og:site_name" content="Mochen’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-07-12T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Training Word Embeddings" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-07-12T00:00:00-05:00","datePublished":"2022-07-12T00:00:00-05:00","description":"A step-by-step illustration of skip-gram and continuous bag-of-words models","headline":"Training Word Embeddings","mainEntityOfPage":{"@type":"WebPage","@id":"https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2022/07/12/Word-Embedding.html"},"url":"https://mochenyang.github.io/mochenyangblog/machine-learning/exposition/2022/07/12/Word-Embedding.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/mochenyangblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mochenyang.github.io/mochenyangblog/feed.xml" title="Mochen's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/mochenyangblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/mochenyangblog/">Mochen&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/mochenyangblog/search/">Search</a><a class="page-link" href="/mochenyangblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Training Word Embeddings</h1><p class="page-description">A step-by-step illustration of skip-gram and continuous bag-of-words models</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2022-07-12T00:00:00-05:00" itemprop="datePublished">
+        Jul 12, 2022
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      4 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#machine-learning">machine-learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#exposition">exposition</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#setup">Setup</a></li>
+<li class="toc-entry toc-h2"><a href="#skip-gram-architecture">Skip-Gram Architecture</a></li>
+<li class="toc-entry toc-h2"><a href="#continuous-bag-of-words-cbow">Continuous Bag-of-Words (CBOW)</a></li>
+</ul><p>This post walks through a small concrete example to illustrate the skip-gram (SG) architecture to train word embeddings. The continuous bag-of-words (CBOW) architecture can be understood by following a very similar procedure.</p>
+
+<h2 id="setup">
+<a class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>To make the mathematical details easier to follow, we will stick with a very small example. Specifically, imagine the training corpus contains a single sentence “I love trucks”, and our goal is to learn 2-dimensional embedding (i.e., $D=2$) for each of the three words in vocabulary $V={I,love,trucks}$. In practice, the training corpus typically contains a very large amounts of texts (e.g., millions of sentences), the vocabulary size is usually tens of thousands, and the embedding dimension is usually a few hundreds.</p>
+
+<h2 id="skip-gram-architecture">
+<a class="anchor" href="#skip-gram-architecture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Skip-Gram Architecture</h2>
+
+<p>The skip-gram model trains word embeddings by using a given focal word to predict a context word (i.e., a word in the vicinity of the focal word). The architecture is a fully-connected, feed-forward neural network with three layers: an input layer, a “projection” layer, and an output layer. The “projection” layer is a bit different from a typical hidden layer, in the sense that it does not apply any non-linear activation. For concreteness, consider the following training example from our sentence: let’s pick “love” as the focal word and use it to predict “trucks”. In other word, “love” is the input and the desired output is “trucks”.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
+
+<p>In the skip-gram network, both the input and output layers have exactly $V$ neurons. The input layer is simply one-hot encoding of the input, i.e., the input neurons take values 1/0, corresponding to each words in the vocabulary. The output layer has the standard softmax activation. Importantly, the projection layer contains exactly $D$ neurons. Its purpose is to “project” each input word to the embedding space (with dimension $D$), and then to “project” the embedding representation to produce the output. Using the $love \rightarrow trucks$ training example, here is exactly what happens in the network:</p>
+
+<p><img src="/mochenyangblog/images/word_embedding/SG.png" alt="SG"></p>
+
+<p>where $w_{ij}$ denote the weights from input to projection, and $w’<em>{ji}$ denote the weights from projection to output. For conciseness, we can also write these weights as vectors: $\vec{w_1} = (w</em>{11},w_{12})$, $\vec{w_2} = (w_{21},w_{22})$, $\vec{w_3} = (w_{31},w_{32})$; and similarly $\vec{w’<em>1}=(w’</em>{11},w’<em>{21})$, $\vec{w’_2}=(w’</em>{12},w’<em>{22})$, $\vec{w’_3}=(w’</em>{13},w’_{23})$.</p>
+
+<p>Now, let’s run through the network and compute the information that flows in and out of each layer:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Information In</th>
+      <th>Information Out</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Input</td>
+      <td>word “love”</td>
+      <td>One-hot encoding $(0,1,0)$</td>
+    </tr>
+    <tr>
+      <td>Projection (1st neuron)</td>
+      <td>$0 \cdot w_{11}+1\cdot w_{21}+0\cdot w_{31} = w_{21}$</td>
+      <td>$w_{21}$ (directly pass the information)</td>
+    </tr>
+    <tr>
+      <td>Projection (2nd neuron)</td>
+      <td>$0 \cdot w_{12}+1\cdot w_{22}+0\cdot w_{32} = w_{22}$</td>
+      <td>$w_{22}$ (directly pass the information)</td>
+    </tr>
+    <tr>
+      <td>Output (1st neuron)</td>
+      <td>$w_{21} \cdot w’<em>{11} + w</em>{22} \cdot w’_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_1$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>1)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+    </tr>
+    <tr>
+      <td>Output (2nd neuron)</td>
+      <td>$w_{21} \cdot w’<em>{12} + w</em>{22} \cdot w’_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_2$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>2)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+    </tr>
+    <tr>
+      <td>Output (3rd neuron)</td>
+      <td>$w_{21} \cdot w’<em>{13} + w</em>{22} \cdot w’_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_3$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>3)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Then, comparing the softmax-transformed probabilities at the output layer with the label $(0,0,1)$, one can derive the loss value associated with this example.<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> Via gradient descent, the goal is to learn the network weights.</p>
+
+<p>Importantly, <strong>the network weights are treated as the embeddings of words</strong>. For example, $(w_{11},w_{12})$ is the 2-dimensional embedding of the word “I”, because it projects the word “I” into a 2-dimensional space. Notice that, in the above example, each word seems to have two embeddings, respectively from the weights connecting input to projection and from the weights connecting projection to output (e.g., $\vec{w_1}$ and $\vec{w’<em>1}$ for word “I”). The skip-gram model leverages a “<strong>parameter sharing</strong>” trick here, setting $\vec{w_i} = \vec{w’</em>{i}}$ for all words. Doing so (1) reduces the total number of parameters to learn by a half and (2) produces a single embedding for a given word.</p>
+
+<h2 id="continuous-bag-of-words-cbow">
+<a class="anchor" href="#continuous-bag-of-words-cbow" aria-hidden="true"><span class="octicon octicon-link"></span></a>Continuous Bag-of-Words (CBOW)</h2>
+
+<p>The CBOW architecture can be understood in a similar way, by walking through the above example (a good exercise for readers). The key different is that CBOW uses a collection of context words to predict a focal word (analogous to a “fill in the blank” language task).</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>In other words, each training instance is a pair of focal and context words. Additional technical details such as <em>negative sampling</em> is ignored here for simplicity. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>Of course, when training with many examples in practice, the loss values associated with all training instances in a batch will be summed before the gradient is computed. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div><a class="u-url" href="/mochenyangblog/machine-learning/exposition/2022/07/12/Word-Embedding.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/mochenyangblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/mochenyangblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/mochenyangblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A blog for research and expositional articles.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
