@@ -10,7 +10,7 @@ This post walks through a small concrete example to illustrate the skip-gram (SG
 
 ## Setup
 
-To make the mathematical details easier to follow, we will stick with a very small example. Specifically, imagine the training corpus contains a single sentence "I love trucks", and our goal is to learn 2-dimensional embedding (i.e., $D=2$) for each of the three words in vocabulary $V=\{I,love,trucks\}$. In practice, the training corpus typically contains a very large amounts of texts (e.g., millions of sentences), the vocabulary size is usually tens of thousands, and the embedding dimension is usually a few hundreds.
+To make the mathematical details easier to follow, we will stick with a very small example. Specifically, imagine the training corpus contains a single sentence "I love trucks", and our goal is to learn 2-dimensional embedding (i.e., $D=2$) for each of the three words in vocabulary $V=(I,love,trucks)$. In practice, the training corpus typically contains a very large amounts of texts (e.g., millions of sentences), the vocabulary size is usually tens of thousands, and the embedding dimension is usually a few hundreds.
 
 ## Skip-Gram Architecture
 
@@ -20,7 +20,7 @@ In the skip-gram network, both the input and output layers have exactly $V$ neur
 
 <img src="/mochenyangblog/images/word_embedding/SG.png" alt="SG" />
 
-where $w_{ij}$ denote the weights from input to projection, and $w'_{ji}$ denote the weights from projection to output. For conciseness, we can also write these weights as vectors: $\vec{w_1} = (w_{11},w_{12})$, $\vec{w_2} = (w_{21},w_{22})$, $\vec{w_3} = (w_{31},w_{32})$; and similarly $\vec{w'_1}=(w'_{11},w'_{21})$, $\vec{w'_2}=(w'_{12},w'_{22})$, $\vec{w'_3}=(w'_{13},w'_{23})$.
+where $w_{ij}$ denote the weights from input to projection, and $u_{ji}$ denote the weights from projection to output. For conciseness, we can also write these weights as vectors: $\vec{w_1} = (w_{11},w_{12})$, $\vec{w_2} = (w_{21},w_{22})$, $\vec{w_3} = (w_{31},w_{32})$; and similarly $\vec{u_1}=(u_{11},u_{21})$, $\vec{u_2}=(u_{12},u_{22})$, $\vec{u_3}=(u_{13},u_{23})$.
 
 Now, let's run through the network and compute the information that flows in and out of each layer:
 
@@ -29,13 +29,13 @@ Now, let's run through the network and compute the information that flows in and
 | Input                   | word "love"                                                  | One-hot encoding $(0,1,0)$                                   |
 | Projection (1st neuron) | $0 \cdot w_{11}+1\cdot w_{21}+0\cdot w_{31} = w_{21}$        | $w_{21}$ (directly pass the information)                     |
 | Projection (2nd neuron) | $0 \cdot w_{12}+1\cdot w_{22}+0\cdot w_{32} = w_{22}$        | $w_{22}$ (directly pass the information)                     |
-| Output (1st neuron)     | $w_{21} \cdot w'_{11} + w_{22} \cdot w'_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{w'}_1$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_1)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_i)}$ (standard softmax activation) |
-| Output (2nd neuron)     | $w_{21} \cdot w'_{12} + w_{22} \cdot w'_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{w'}_2$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_2)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_i)}$ (standard softmax activation) |
-| Output (3rd neuron)     | $w_{21} \cdot w'_{13} + w_{22} \cdot w'_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{w'}_3$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_3)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w'}_i)}$ (standard softmax activation) |
+| Output (1st neuron)     | $w_{21} \cdot u_{11} + w_{22} \cdot u_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_1$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_1)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation) |
+| Output (2nd neuron)     | $w_{21} \cdot u_{12} + w_{22} \cdot u_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_2$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_2)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation) |
+| Output (3rd neuron)     | $w_{21} \cdot u_{13} + w_{22} \cdot u_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_3$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_3)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation) |
 
 Then, comparing the softmax-transformed probabilities at the output layer with the label $(0,0,1)$, one can derive the loss value associated with this example.[^2] Via gradient descent, the goal is to learn the network weights.
 
-Importantly, **the network weights are treated as the embeddings of words**. For example, $(w_{11},w_{12})$ is the 2-dimensional embedding of the word "I", because it projects the word "I" into a 2-dimensional space. Notice that, in the above example, each word seems to have two embeddings, respectively from the weights connecting input to projection and from the weights connecting projection to output (e.g., $\vec{w_1}$ and $\vec{w'_1}$ for word "I"). The skip-gram model leverages a "**parameter sharing**" trick here, setting $\vec{w_i} = \vec{w'_{i}}$ for all words. Doing so (1) reduces the total number of parameters to learn by a half and (2) produces a single embedding for a given word.
+Importantly, **the network weights are treated as the embeddings of words**. For example, $(w_{11},w_{12})$ is the 2-dimensional embedding of the word "I", because it projects the word "I" into a 2-dimensional space. Notice that, in the above example, each word seems to have two embeddings, respectively from the weights connecting input to projection and from the weights connecting projection to output (e.g., $\vec{w_1}$ and $\vec{u_1}$ for word "I"). The skip-gram model leverages a "**parameter sharing**" trick here, setting $\vec{w_i} = \vec{u_{i}}$ for all words. Doing so (1) reduces the total number of parameters to learn by a half and (2) produces a single embedding for a given word.
 
 ## Continuous Bag-of-Words (CBOW)
 
