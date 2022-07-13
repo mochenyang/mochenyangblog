@@ -29,9 +29,9 @@ Now, let's run through the network and compute the information that flows in and
 | Input                   | word "love"                                                  | One-hot encoding $(0,1,0)$                                   |
 | Projection (1st neuron) | $0 \cdot w_{11}+1\cdot w_{21}+0\cdot w_{31} = w_{21}$        | $w_{21}$ (directly pass the information)                     |
 | Projection (2nd neuron) | $0 \cdot w_{12}+1\cdot w_{22}+0\cdot w_{32} = w_{22}$        | $w_{22}$ (directly pass the information)                     |
-| Output (1st neuron)     | $w_{21} \cdot u_{11} + w_{22} \cdot u_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_1$ | $\frac{e^{\vec{w_2} \boldsymbol{\cdot} \vec{u}_1}}{\sum_{i=1}^3 e^{\vec{w_2} \boldsymbol{\cdot} \vec{u}_i}}$ (standard softmax activation) |
-| Output (2nd neuron)     | $w_{21} \cdot u_{12} + w_{22} \cdot u_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_2$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_2)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation) |
-| Output (3rd neuron)     | $w_{21} \cdot u_{13} + w_{22} \cdot u_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_3$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_3)}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation) |
+| Output (1st neuron)     | $w_{21} \cdot u_{11} + w_{22} \cdot u_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_1$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_1})}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_i})}$ (standard softmax activation) |
+| Output (2nd neuron)     | $w_{21} \cdot u_{12} + w_{22} \cdot u_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_2$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_2})}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_i})}$ (standard softmax activation) |
+| Output (3rd neuron)     | $w_{21} \cdot u_{13} + w_{22} \cdot u_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_3$ | $\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_3})}{\sum_{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u_i})}$ (standard softmax activation) |
 
 Then, comparing the softmax-transformed probabilities at the output layer with the label $(0,0,1)$, one can derive the loss value associated with this example.[^2] Via gradient descent, the goal is to learn the network weights.
 
