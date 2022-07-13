@@ -123,7 +123,7 @@ window.onload = wrap_img;
 <h2 id="setup">
 <a class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
 
-<p>To make the mathematical details easier to follow, we will stick with a very small example. Specifically, imagine the training corpus contains a single sentence “I love trucks”, and our goal is to learn 2-dimensional embedding (i.e., $D=2$) for each of the three words in vocabulary $V={I,love,trucks}$. In practice, the training corpus typically contains a very large amounts of texts (e.g., millions of sentences), the vocabulary size is usually tens of thousands, and the embedding dimension is usually a few hundreds.</p>
+<p>To make the mathematical details easier to follow, we will stick with a very small example. Specifically, imagine the training corpus contains a single sentence “I love trucks”, and our goal is to learn 2-dimensional embedding (i.e., $D=2$) for each of the three words in vocabulary $V=(I,love,trucks)$. In practice, the training corpus typically contains a very large amounts of texts (e.g., millions of sentences), the vocabulary size is usually tens of thousands, and the embedding dimension is usually a few hundreds.</p>
 
 <h2 id="skip-gram-architecture">
 <a class="anchor" href="#skip-gram-architecture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Skip-Gram Architecture</h2>
@@ -134,7 +134,7 @@ window.onload = wrap_img;
 
 <p><img src="/mochenyangblog/images/word_embedding/SG.png" alt="SG"></p>
 
-<p>where $w_{ij}$ denote the weights from input to projection, and $w’<em>{ji}$ denote the weights from projection to output. For conciseness, we can also write these weights as vectors: $\vec{w_1} = (w</em>{11},w_{12})$, $\vec{w_2} = (w_{21},w_{22})$, $\vec{w_3} = (w_{31},w_{32})$; and similarly $\vec{w’<em>1}=(w’</em>{11},w’<em>{21})$, $\vec{w’_2}=(w’</em>{12},w’<em>{22})$, $\vec{w’_3}=(w’</em>{13},w’_{23})$.</p>
+<p>where $w_{ij}$ denote the weights from input to projection, and $u_{ji}$ denote the weights from projection to output. For conciseness, we can also write these weights as vectors: $\vec{w_1} = (w_{11},w_{12})$, $\vec{w_2} = (w_{21},w_{22})$, $\vec{w_3} = (w_{31},w_{32})$; and similarly $\vec{u_1}=(u_{11},u_{21})$, $\vec{u_2}=(u_{12},u_{22})$, $\vec{u_3}=(u_{13},u_{23})$.</p>
 
 <p>Now, let’s run through the network and compute the information that flows in and out of each layer:</p>
 
@@ -164,25 +164,25 @@ window.onload = wrap_img;
     </tr>
     <tr>
       <td>Output (1st neuron)</td>
-      <td>$w_{21} \cdot w’<em>{11} + w</em>{22} \cdot w’_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_1$</td>
-      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>1)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+      <td>$w_{21} \cdot u_{11} + w_{22} \cdot u_{21} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_1$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}<em>1)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation)</td>
     </tr>
     <tr>
       <td>Output (2nd neuron)</td>
-      <td>$w_{21} \cdot w’<em>{12} + w</em>{22} \cdot w’_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_2$</td>
-      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>2)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+      <td>$w_{21} \cdot u_{12} + w_{22} \cdot u_{22} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_2$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}<em>2)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation)</td>
     </tr>
     <tr>
       <td>Output (3rd neuron)</td>
-      <td>$w_{21} \cdot w’<em>{13} + w</em>{22} \cdot w’_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{w’}_3$</td>
-      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}<em>3)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{w’}_i)}$ (standard softmax activation)</td>
+      <td>$w_{21} \cdot u_{13} + w_{22} \cdot u_{23} = \vec{w_2} \boldsymbol{\cdot} \vec{u}_3$</td>
+      <td>$\frac{\exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}<em>3)}{\sum</em>{i=1}^3 \exp(\vec{w_2} \boldsymbol{\cdot} \vec{u}_i)}$ (standard softmax activation)</td>
     </tr>
   </tbody>
 </table>
 
 <p>Then, comparing the softmax-transformed probabilities at the output layer with the label $(0,0,1)$, one can derive the loss value associated with this example.<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup> Via gradient descent, the goal is to learn the network weights.</p>
 
-<p>Importantly, <strong>the network weights are treated as the embeddings of words</strong>. For example, $(w_{11},w_{12})$ is the 2-dimensional embedding of the word “I”, because it projects the word “I” into a 2-dimensional space. Notice that, in the above example, each word seems to have two embeddings, respectively from the weights connecting input to projection and from the weights connecting projection to output (e.g., $\vec{w_1}$ and $\vec{w’<em>1}$ for word “I”). The skip-gram model leverages a “<strong>parameter sharing</strong>” trick here, setting $\vec{w_i} = \vec{w’</em>{i}}$ for all words. Doing so (1) reduces the total number of parameters to learn by a half and (2) produces a single embedding for a given word.</p>
+<p>Importantly, <strong>the network weights are treated as the embeddings of words</strong>. For example, $(w_{11},w_{12})$ is the 2-dimensional embedding of the word “I”, because it projects the word “I” into a 2-dimensional space. Notice that, in the above example, each word seems to have two embeddings, respectively from the weights connecting input to projection and from the weights connecting projection to output (e.g., $\vec{w_1}$ and $\vec{u_1}$ for word “I”). The skip-gram model leverages a “<strong>parameter sharing</strong>” trick here, setting $\vec{w_i} = \vec{u_{i}}$ for all words. Doing so (1) reduces the total number of parameters to learn by a half and (2) produces a single embedding for a given word.</p>
 
 <h2 id="continuous-bag-of-words-cbow">
 <a class="anchor" href="#continuous-bag-of-words-cbow" aria-hidden="true"><span class="octicon octicon-link"></span></a>Continuous Bag-of-Words (CBOW)</h2>
