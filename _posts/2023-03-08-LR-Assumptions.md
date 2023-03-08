@@ -17,7 +17,7 @@ $$
 Y=\beta x + \varepsilon
 $$
 
-The intercept term is omitted for simplicity (e.g., imagine the data has been centered). For this question, suppose that none of the "usual suspects" that might threaten the estimation exist, i.e., there is no endogeneity whatsoever. Denote the coefficient estimate as $\widehat{\beta}^{(N)}$. Now imagine you make a copy of every single data point, thereby creating a sample of $2N$ data points, $\{(x_i,y_i)_{i=1}^N, (x_i,y_i)_{i=1}^N\}$. Then estimate the same regression on this twice-as-large sample and denote the coefficient estimate as $\widehat{\beta_1}^{(2N)}$. **The question is:** what is the relationship between $\widehat{\beta_1}^{(N)}$ and $\widehat{\beta}^{(2N)}$, and between $SE(\widehat{\beta}^{(N)})$ and $SE(\widehat{\beta}^{(2N)})$?
+The intercept term is omitted for simplicity (e.g., imagine the data has been centered). For this question, suppose that none of the "usual suspects" that might threaten the estimation exist, i.e., there is no endogeneity whatsoever. Denote the coefficient estimate as $\widehat{\beta}^{(N)}$. Now imagine you make a copy of every single data point, thereby creating a sample of $2N$ data points. Then estimate the same regression on this twice-as-large sample and denote the coefficient estimate as $\widehat{\beta_1}^{(2N)}$. **The question is:** what is the relationship between $\widehat{\beta_1}^{(N)}$ and $\widehat{\beta}^{(2N)}$, and between $SE(\widehat{\beta}^{(N)})$ and $SE(\widehat{\beta}^{(2N)})$?
 
 To answer this question, one could (mechanically) follow the least-square formula for coefficient estimate and its standard error and discover that
 
