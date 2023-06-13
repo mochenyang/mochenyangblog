@@ -22,9 +22,11 @@ Consider three clusters, $I$, $J$, and $K$, where clusters $I$ and $J$ are to be
 # Lance-Williams Algorithm
 
 The Lance-Williams algorithm says that, for a large collection of linkage methods, the distance $d(IJ, K)$ can be expressed as a recursive expression of $d(I, K)$, $d(J, K)$, and $d(I,J)$, as such:
+
 $$
 d(IJ,K) = \alpha_i d(I,K) + \alpha_j d(J, K) + \beta d(I,J) + \gamma |d(I,K) - d(J,K)|
 $$
+
 where  specific to the choice of linkage method (see [this paper](https://doi.org/10.2307/2344237) for a list of parameter values for common linkage methods). This is pretty impressive (and useful), because it allows us to easily compute the distance between a merged cluster with other clusters using (already computed and available) inter-cluster distances. Cool, but why does it work?
 
 ## Illustration for Single / Complete / Average Linkage
@@ -38,9 +40,11 @@ The $\alpha,\beta,\gamma$ parameters values for single, complete, and average li
 | Average Linkage  | $n_I/(n_I+n_J)$ | $n_J/(n_I+n_J)$ | $0$     | $0$      |
 
 Let's start with the single linkage method to illustrate why this is true. Recall that single linkage uses the nearest neighbors between the two clusters as the cluster distance, i.e., $d(I,J) = \min_{i \in I, j \in J} d(i,j)$. The RHS of the Lance-Williams equation is
+
 $$
 1/2 d(I,K) + 1/2 d(J,K) - 1/2 |d(I,K) - d(J,K)|
 $$
+
 If $d(I,K) > d(J,K)$, the above simplifies to $d(J,K)$, and if $d(I,K) < d(J,K)$, it simplifies to $d(I,K)$. In other words, the above expression is equivalent to $\min\{d(I,K), d(J,K)\}$, which, by definition of single linkage, is exactly $d(IJ, k)$. The same derivation will show you that the parameter values for complete linkage are also correct.
 
 Now, for average linkage, we only need to notice that, by definition, $d(I,K) = \frac{\sum d(i,k)}{n_I \cdot n_K}$ and $d(J,K) = \frac{\sum d(j,k)}{n_J \cdot n_K}$. Simply plugging in the parameters will show you that it works as intended.
@@ -59,11 +63,15 @@ Here I will derive this result for the centroid distance (and similar derivation
 For now, let's assume a Squared Euclidean distance metric (the reason is not clear at all at this point, but stay with me for now), meaning that for any two data points with coordinates $x=(x_1, \ldots, x_M)$ and $y=(y_1, \ldots, y_M)$, we have $d(x,y) = \sum_{m=1}^M (x_m - y_m)^2$ where $m$ indexes each one of the $M$ features. A nice thing about this metric is that the squared difference on each feature is fully additive. So, we don't need to carry around the summation over all features -- we can just need to work (symbolically) with $(x-y)^2$. 
 
 Next, plug in the parameter values for the RHS of Lance-William, we get:
+
 $$
 n_I/(n_I+n_J) (C_I - C_K)^2 + n_J/(n_I+n_J) (C_J - C_K)^2 -n_I n_J/(n_I+n_J)^2 (C_I - C_J)^2
 $$
+
 Open up all the squares and re-arrange the terms, we will eventually see that it indeed equals $d(IJ,K)$, which is 
+
 $$
 \left(\frac{n_I c_I + n_J c_J }{n_I+n_J} - C_K \right)^2
 $$
+
 However, the important thing to notice is that the above derivation **only works** when the underlying distance metric is Squared Euclidean. This is why, when using centroid or Ward's method for cluster distance, one should always pick Euclidean distance as the metric to measure distance between data points (then the software implementations will square those distances when performing Lance-Williams, see [this](https://github.com/scipy/scipy/blob/v1.10.1/scipy/cluster/_hierarchy_distance_update.pxi) as and example of how Scipy does it). In fact, the notation of "centroid" only really make sense in a Euclidean space.
