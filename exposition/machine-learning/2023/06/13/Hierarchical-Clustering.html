@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Cluster Distance in Hierarchical Clustering | Mochen’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Cluster Distance in Hierarchical Clustering" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="An In-Depth Discussion of Different Linkage Methods and the Lance–Williams Algorithm" />
+<meta property="og:description" content="An In-Depth Discussion of Different Linkage Methods and the Lance–Williams Algorithm" />
+<link rel="canonical" href="https://mochenyang.github.io/mochenyangblog/exposition/machine-learning/2023/06/13/Hierarchical-Clustering.html" />
+<meta property="og:url" content="https://mochenyang.github.io/mochenyangblog/exposition/machine-learning/2023/06/13/Hierarchical-Clustering.html" />
+<meta property="og:site_name" content="Mochen’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-13T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Cluster Distance in Hierarchical Clustering" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-06-13T00:00:00-05:00","datePublished":"2023-06-13T00:00:00-05:00","description":"An In-Depth Discussion of Different Linkage Methods and the Lance–Williams Algorithm","headline":"Cluster Distance in Hierarchical Clustering","mainEntityOfPage":{"@type":"WebPage","@id":"https://mochenyang.github.io/mochenyangblog/exposition/machine-learning/2023/06/13/Hierarchical-Clustering.html"},"url":"https://mochenyang.github.io/mochenyangblog/exposition/machine-learning/2023/06/13/Hierarchical-Clustering.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/mochenyangblog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://mochenyang.github.io/mochenyangblog/feed.xml" title="Mochen's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/mochenyangblog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/mochenyangblog/">Mochen&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/mochenyangblog/search/">Search</a><a class="page-link" href="/mochenyangblog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Cluster Distance in Hierarchical Clustering</h1><p class="page-description">An In-Depth Discussion of Different Linkage Methods and the Lance–Williams Algorithm</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2023-06-13T00:00:00-05:00" itemprop="datePublished">
+        Jun 13, 2023
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      6 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#exposition">exposition</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/mochenyangblog/categories/#machine-learning">machine-learning</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#motivation">Motivation</a></li>
+<li class="toc-entry toc-h1"><a href="#notation">Notation</a></li>
+<li class="toc-entry toc-h1"><a href="#lance-williams-algorithm">Lance-Williams Algorithm</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#illustration-for-single--complete--average-linkage">Illustration for Single / Complete / Average Linkage</a></li>
+<li class="toc-entry toc-h2"><a href="#illustration-for-centroid-and-wards-method">Illustration for Centroid and Ward’s Method</a></li>
+</ul>
+</li>
+</ul><h1 id="motivation">
+<a class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h1>
+
+<p>Hierarchical clustering is one of the most commonly used algorithms to discover clusters from data. It works by iteratively merging smaller clusters that are closest to each other into bigger ones. A key ingredient to hierarchical clustering is a metric to quantify the distance between two clusters (which is different from the measure of distance between to individual data points). A number of such cluster distance metrics (a.k.a. linkage methods) are available, such as single linkage, complete linkage, average linkage, centroid distance, and Ward’s method (see <a href="https://en.wikipedia.org/wiki/Hierarchical_clustering#Cluster_Linkage">this wiki page for many more</a>).</p>
+
+<p>During the process of hierarchical clustering, as clusters are being merged, there is the need to compute the distance between the a newly merged cluster and all the other clusters (or data points), in order to find the next two clusters to merge. Of course, one could simply maintain the raw data and re-compute all pair-wise distances among all clusters every time after a merge happens. This is, however, computationally quite wasteful because, at the very least, pair-wise distances among clusters that are not newly merged do not need to be computed again.</p>
+
+<p>With computational efficiency in mind, it turns out that for a large collection of linkage methods, you do not even need to maintain the raw data. Calculate the pair-wise distance among all individual data points once to get the distance matrix, and that’s all you need moving forward. In fact, the <code class="language-plaintext highlighter-rouge">hclust</code> function in <code class="language-plaintext highlighter-rouge">R</code>, for example, explicitly takes distance matrix (not raw data) as input.</p>
+
+<p>How does this work? In particular, how can we update the distance matrix once two (smaller) clusters are merged, to properly reflect the cluster distance between the newly formed cluster and the rest of data? The goal of this blog is to answer this question, through which we will get to know the <a href="https://en.wikipedia.org/wiki/Ward%27s_method#Lance%E2%80%93Williams_algorithms">Lance–Williams Algorithm</a>, and also clarify some (often omitted) technical details about the centroid and Ward’s methods.</p>
+
+<h1 id="notation">
+<a class="anchor" href="#notation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notation</h1>
+
+<p>Consider three clusters, $I$, $J$, and $K$, where clusters $I$ and $J$ are to be merged in the current iteration of hierarchical clustering, and we want to be able to calculate the distance between the newly formed (bigger) cluster $IJ$ and cluster $K$. Note that, for the purpose of this discussion, we don’t really need to differentiate between clusters and individual data points (i.e., can safely treat a single data points as a cluster of size 1). Denote $n_I$, $n_J$, and $n_K$ as the sizes of the three clusters, respectively. Let $i \in I$, $j \in J$, and $k \in K$ index individual data within the three clusters, and $d()$ denote a chosen distance measure between individual data points (Euclidean, Manhattan, Matching, etc.). With (slight) abuse of notation, I will also use $d()$ to represent distance between clusters. For example $d(I,J)$ will denote the distance between clusters $I$ and $J$, bearing in mind that the way $d(I,J)$ is computed will depend on the specific choice of linkage method.</p>
+
+<h1 id="lance-williams-algorithm">
+<a class="anchor" href="#lance-williams-algorithm" aria-hidden="true"><span class="octicon octicon-link"></span></a>Lance-Williams Algorithm</h1>
+
+<p>The Lance-Williams algorithm says that, for a large collection of linkage methods, the distance $d(IJ, K)$ can be expressed as a recursive expression of $d(I, K)$, $d(J, K)$, and $d(I,J)$, as such:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mi>J</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>α</mi><mi>i</mi></msub><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>+</mo><msub><mi>α</mi><mi>j</mi></msub><mi>d</mi><mo stretchy="false">(</mo><mi>J</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mi>J</mi><mo stretchy="false">)</mo><mo>+</mo><mi>γ</mi><mi mathvariant="normal">∣</mi><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>−</mo><mi>d</mi><mo stretchy="false">(</mo><mi>J</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">d(IJ,K) = \alpha_i d(I,K) + \alpha_j d(J, K) + \beta d(I,J) + \gamma |d(I,K) - d(J,K)|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord">∣</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mord">∣</span></span></span></span>
+where  specific to the choice of linkage method (see <a href="https://doi.org/10.2307/2344237">this paper</a> for a list of parameter values for common linkage methods). This is pretty impressive (and useful), because it allows us to easily compute the distance between a merged cluster with other clusters using (already computed and available) inter-cluster distances. Cool, but why does it work?</p>
+
+<h2 id="illustration-for-single--complete--average-linkage">
+<a class="anchor" href="#illustration-for-single--complete--average-linkage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Illustration for Single / Complete / Average Linkage</h2>
+
+<p>The $\alpha,\beta,\gamma$ parameters values for single, complete, and average linkage methods are:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Linkage Method</th>
+      <th>$\alpha_1$</th>
+      <th>$\alpha_2$</th>
+      <th>$\beta$</th>
+      <th>$\gamma$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Single Linkage</td>
+      <td>$1/2$</td>
+      <td>$1/2$</td>
+      <td>$0$</td>
+      <td>$-1/2$</td>
+    </tr>
+    <tr>
+      <td>Complete Linkage</td>
+      <td>$1/2$</td>
+      <td>$1/2$</td>
+      <td>$0$</td>
+      <td>$1/2$</td>
+    </tr>
+    <tr>
+      <td>Average Linkage</td>
+      <td>$n_I/(n_I+n_J)$</td>
+      <td>$n_J/(n_I+n_J)$</td>
+      <td>$0$</td>
+      <td>$0$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Let’s start with the single linkage method to illustrate why this is true. Recall that single linkage uses the nearest neighbors between the two clusters as the cluster distance, i.e., $d(I,J) = \min_{i \in I, j \in J} d(i,j)$. The RHS of the Lance-Williams equation is
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>2</mn><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>+</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>2</mn><mi>d</mi><mo stretchy="false">(</mo><mi>J</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>−</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>2</mn><mi mathvariant="normal">∣</mi><mi>d</mi><mo stretchy="false">(</mo><mi>I</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mo>−</mo><mi>d</mi><mo stretchy="false">(</mo><mi>J</mi><mo separator="true">,</mo><mi>K</mi><mo stretchy="false">)</mo><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">1/2 d(I,K) + 1/2 d(J,K) - 1/2 |d(I,K) - d(J,K)|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/2</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/2</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/2∣</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mclose">)</span><span class="mord">∣</span></span></span></span>
+If $d(I,K) &gt; d(J,K)$, the above simplifies to $d(J,K)$, and if $d(I,K) &lt; d(J,K)$, it simplifies to $d(I,K)$. In other words, the above expression is equivalent to $\min{d(I,K), d(J,K)}$, which, by definition of single linkage, is exactly $d(IJ, k)$. The same derivation will show you that the parameter values for complete linkage are also correct.</p>
+
+<p>Now, for average linkage, we only need to notice that, by definition, $d(I,K) = \frac{\sum d(i,k)}{n_I \cdot n_K}$ and $d(J,K) = \frac{\sum d(j,k)}{n_J \cdot n_K}$. Simply plugging in the parameters will show you that it works as intended.</p>
+
+<h2 id="illustration-for-centroid-and-wards-method">
+<a class="anchor" href="#illustration-for-centroid-and-wards-method" aria-hidden="true"><span class="octicon octicon-link"></span></a>Illustration for Centroid and Ward’s Method</h2>
+
+<p>The more (nuanced) cases are methods like centroid and Ward’s, which relies on the concept of “centroid” (i.e., geometric mean of a cluster). Their parameter values are as follows (now far from obvious):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Linkage Method</th>
+      <th>$\alpha_1$</th>
+      <th>$\alpha_2$</th>
+      <th>$\beta$</th>
+      <th>$\gamma$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Centroid Distance</td>
+      <td>$n_I/(n_I+n_J)$</td>
+      <td>$n_J/(n_I+n_J)$</td>
+      <td>$-n_I n_J/(n_I+n_J)^2$</td>
+      <td>$0$</td>
+    </tr>
+    <tr>
+      <td>Ward’s Method</td>
+      <td>$(n_I+n_K)/(n_I+n_J+n_K)$</td>
+      <td>$(n_J+n_K)/(n_I+n_J+n_K)$</td>
+      <td>$-n_K/(n_I+n_J+n_K)$</td>
+      <td>$0$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Here I will derive this result for the centroid distance (and similar derivation can be done for the Ward’s method). First, let $C_I$, $C_J$, and $C_K$ denote the centroids of the three initial clusters – they are single points just like individual data. Note that, by definition of centroid, $C_{IJ} = \frac{n_I c_I + n_J c_J }{n_I+n_J}$.</p>
+
+<p>For now, let’s assume a Squared Euclidean distance metric (the reason is not clear at all at this point, but stay with me for now), meaning that for any two data points with coordinates $x=(x_1, \ldots, x_M)$ and $y=(y_1, \ldots, y_M)$, we have $d(x,y) = \sum_{m=1}^M (x_m - y_m)^2$ where $m$ indexes each one of the $M$ features. A nice thing about this metric is that the squared difference on each feature is fully additive. So, we don’t need to carry around the summation over all features – we can just need to work (symbolically) with $(x-y)^2$.</p>
+
+<p>Next, plug in the parameter values for the RHS of Lance-William, we get:
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mi>I</mi></msub><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msub><mi>n</mi><mi>I</mi></msub><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>C</mi><mi>I</mi></msub><mo>−</mo><msub><mi>C</mi><mi>K</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msub><mi>n</mi><mi>I</mi></msub><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>C</mi><mi>J</mi></msub><mo>−</mo><msub><mi>C</mi><mi>K</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>−</mo><msub><mi>n</mi><mi>I</mi></msub><msub><mi>n</mi><mi>J</mi></msub><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msub><mi>n</mi><mi>I</mi></msub><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo stretchy="false">(</mo><msub><mi>C</mi><mi>I</mi></msub><mo>−</mo><msub><mi>C</mi><mi>J</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">n_I/(n_I+n_J) (C_I - C_K)^2 + n_J/(n_I+n_J) (C_J - C_K)^2 -n_I n_J/(n_I+n_J)^2 (C_I - C_J)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">K</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">K</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>
+Open up all the squares and re-arrange the terms, we will eventually see that it indeed equals $d(IJ,K)$, which is 
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow><mo fence="true">(</mo><mfrac><mrow><msub><mi>n</mi><mi>I</mi></msub><msub><mi>c</mi><mi>I</mi></msub><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub><msub><mi>c</mi><mi>J</mi></msub></mrow><mrow><msub><mi>n</mi><mi>I</mi></msub><mo>+</mo><msub><mi>n</mi><mi>J</mi></msub></mrow></mfrac><mo>−</mo><msub><mi>C</mi><mi>K</mi></msub><mo fence="true">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\left(\frac{n_I c_I + n_J c_J }{n_I+n_J} - C_K \right)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.004em;vertical-align:-0.65em;"></span><span class="minner"><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size2">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8186em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span><span class="mbin mtight">+</span><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.4103em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span><span class="mbin mtight">+</span><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.09618em;">J</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4453em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">K</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size2">)</span></span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.354em;"><span style="top:-3.6029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>
+However, the important thing to notice is that the above derivation <strong>only works</strong> when the underlying distance metric is Squared Euclidean. This is why, when using centroid or Ward’s method for cluster distance, one should always pick Euclidean distance as the metric to measure distance between data points (then the software implementations will square those distances when performing Lance-Williams, see <a href="https://github.com/scipy/scipy/blob/v1.10.1/scipy/cluster/_hierarchy_distance_update.pxi">this</a> as and example of how Scipy does it). In fact, the notation of “centroid” only really make sense in a Euclidean space.</p>
+
+  </div><a class="u-url" href="/mochenyangblog/exposition/machine-learning/2023/06/13/Hierarchical-Clustering.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/mochenyangblog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="https://mochenyang.github.io/mochenyangblog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/mochenyangblog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>A blog for research and expositional articles.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
