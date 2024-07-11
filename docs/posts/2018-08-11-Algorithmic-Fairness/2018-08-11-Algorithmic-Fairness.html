@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.54">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2018-08-11">
+
+<title>Bias, Discrimination, and Algorithmic Fairness – Mochen’s Blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Mochen’s Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mochenyang"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Bias, Discrimination, and Algorithmic Fairness</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">machine-learning</div>
+                <div class="quarto-category">research</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 11, 2018</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#understanding-fairness" id="toc-understanding-fairness" class="nav-link active" data-scroll-target="#understanding-fairness">Understanding Fairness</a>
+  <ul class="collapse">
+  <li><a href="#definition-of-fairness" id="toc-definition-of-fairness" class="nav-link" data-scroll-target="#definition-of-fairness">Definition of Fairness</a></li>
+  <li><a href="#relationship-among-different-fairness-definitions" id="toc-relationship-among-different-fairness-definitions" class="nav-link" data-scroll-target="#relationship-among-different-fairness-definitions">Relationship among Different Fairness Definitions</a></li>
+  <li><a href="#relationship-between-fairness-and-predictive-performance" id="toc-relationship-between-fairness-and-predictive-performance" class="nav-link" data-scroll-target="#relationship-between-fairness-and-predictive-performance">Relationship between Fairness and Predictive Performance</a></li>
+  </ul></li>
+  <li><a href="#addressing-algorithmic-bias" id="toc-addressing-algorithmic-bias" class="nav-link" data-scroll-target="#addressing-algorithmic-bias">Addressing Algorithmic Bias</a>
+  <ul class="collapse">
+  <li><a href="#measurement-and-detection" id="toc-measurement-and-detection" class="nav-link" data-scroll-target="#measurement-and-detection">Measurement and Detection</a></li>
+  <li><a href="#preventionmitigation" id="toc-preventionmitigation" class="nav-link" data-scroll-target="#preventionmitigation">Prevention/Mitigation</a></li>
+  </ul></li>
+  <li><a href="#other-thoughts" id="toc-other-thoughts" class="nav-link" data-scroll-target="#other-thoughts">Other Thoughts</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#other-resources" id="toc-other-resources" class="nav-link" data-scroll-target="#other-resources">Other Resources</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>This is a (outdated) document on recent literature concerning discrimination and fairness issues in decisions driven by machine learning algorithms. A more comprehensive paper on this issue can be found here: <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3446944">Integrating Behavioral, Economic, and Technical Insights to Address Algorithmic Bias: Challenges and Opportunities for IS Research</a>, which is published in <em>ACM Transactions on Management Information Systems (TMIS)</em>.</p>
+<section id="understanding-fairness" class="level2">
+<h2 class="anchored" data-anchor-id="understanding-fairness">Understanding Fairness</h2>
+<p>Various notions of fairness have been discussed in different domains. Different fairness definitions are not necessarily compatible with each other, in the sense that it may not be possible to simultaneously satisfy multiple notions of fairness in a single machine learning model.</p>
+<section id="definition-of-fairness" class="level3">
+<h3 class="anchored" data-anchor-id="definition-of-fairness">Definition of Fairness</h3>
+<p>A common notion of fairness distinguishes <strong>direct discrimination</strong> and <strong>indirect discrimination</strong>. Direct discrimination happens when a person is treated less favorably than another person in comparable situation on protected ground (Romei and Ruggieri 2013; Zliobaite 2015). Here, <em>comparable situation</em> means the two persons are otherwise similarly except on a <em>protected</em> attribute, such as gender, race, etc. In contrast, indirect discrimination happens when an “apparently neutral practice put persons of a protected ground at a particular disadvantage compared with other persons” (Zliobaite 2015).</p>
+<p>The two main types of discrimination are often referred to by other terms under different contexts. Direct discrimination is also known as <em>systematic discrimination</em> or <em>disparate treatment</em>, and indirect discrimination is also known as <em>structural discrimination</em> or <em>disparate outcome</em>. The disparate treatment/outcome terminology is often used in legal settings (e.g., Barocas and Selbst 2016).</p>
+<p>More operational definitions of fairness are available for specific machine learning tasks. Consider a binary classification task. The outcome/label represent an important (binary) decision (<code>pos</code> and <code>neg</code>). One of the features is protected (e.g., gender, race), and it separates the population into several non-overlapping <strong>groups</strong> (e.g., <code>GroupA</code> and <code>GroupB</code>). The classifier estimates the probability that a given instance belongs to <code>pos</code> based on its features. Two notions of fairness are often discussed (e.g., Kleinberg et al.&nbsp;2016): <strong>calibration within group</strong> and <strong>balance</strong>.</p>
+<p>Calibration within group means that for both groups, among persons who are assigned probability <em>p</em> of being <code>pos</code>, there should be <em>p</em> fraction of them that actually belong to <code>pos</code> in expectation. In other words, a probability score should mean what it literally means (in a frequentist sense) regardless of group. A violation of calibration means decision-maker has incentive to interpret the classifier’s result differently for different groups, leading to disparate treatment.</p>
+<p>Balance is class-specific. Balance for <code>pos</code> class means that average probability assigned to people in <code>GroupA</code> who are actually <code>pos</code> should be equal to the average probability assigned to people in <code>GroupB</code> who are actually <code>pos</code>. Balance for <code>neg</code> can be analogously defined. Balance intuitively means the classifier is not disproportionally inaccurate towards people from one group than the other. In other words, condition on the actual label of a person, the chance of misclassification is independent of the group membership. A violation of balance means that, among people who have the same outcome/label, those in one group are treated less favorably (assigned different probabilities) than those in the other. Balance can be formulated equivalently in terms of error rates, under the term of <strong>equalized odds</strong> (Pleiss et al.&nbsp;2017) or <strong>disparate mistreatment</strong> (Zafar et al.&nbsp;2016). In statistical terms, balance for a class is a type of conditional independence. It means that <em>condition on the true outcome</em>, the predicted probability of an instance belong to that class is independent of its group membership.</p>
+<p>Some other fairness notions are available. <em>Statistical Parity</em> requires members from the two groups should receive the same probability of being <code>pos</code>. One should not confuse statistical parity with balance, as the former does not concern about the actual outcomes - it simply requires average predicted probability of <code>pos</code> to be equal for two groups.</p>
+<p>Fairness notions are slightly different (but conceptually related) for numeric prediction or regression tasks. Calders et al.&nbsp;(2013) discuss two definitions. First, <strong>equal means</strong> requires the average predictions for people in the two groups should be equal. This is conceptually similar to <em>statistical parity</em> in classification. Second, <strong>balanced residuals</strong> requires the average residuals (errors) for people in the two groups should be equal. This is conceptually similar to <em>balance</em> in classification.</p>
+</section>
+<section id="relationship-among-different-fairness-definitions" class="level3">
+<h3 class="anchored" data-anchor-id="relationship-among-different-fairness-definitions">Relationship among Different Fairness Definitions</h3>
+<p>First, <strong>not all fairness notions are equally important in a given context</strong>. For example, when base rate (i.e., the actual proportion of <code>pos</code> in a population) differs in the two groups, statistical parity may not be feasible (Kleinberg et al., 2016; Pleiss et al., 2017). Another case against the requirement of statistical parity is discussed in Zliobaite et al.&nbsp;(2011) and Kamiran et al.&nbsp;(2013). Specifically, statistical disparity in the data (measured as the difference between <code>pos</code> probabilities received by members of the two groups) is <em>not all</em> discrimination. Part of the difference may be explainable by other attributes that reflect legitimate/natural/inherent differences between the two groups. They argue that statistical disparity only after <em>conditioning on</em> these attributes should be treated as actual discrimination (a.k.a conditional discrimination). In addition, statistical parity ensures fairness at the group level rather than individual level. Dwork et al.&nbsp;(2011) argue for a even stronger notion of individual fairness, where pairs of similar individuals are treated similarly.</p>
+<p>Second, <strong>not all fairness notions are compatible with each other</strong>. Kleinberg et al.&nbsp;(2016) show that the three notions of fairness in binary classification, i.e., calibration within groups, balance for <code>pos</code> class, and balance for <code>neg</code> class cannot be achieved simultaneously, unless under one of two trivial cases: (1) perfect prediction, or (2) equal base rates in two groups. Such impossibility holds even approximately (i.e., approximate calibration and approximate balance cannot all be achieved unless under approximately trivial cases). Pleiss et al.&nbsp;(2017) extends their work and shows that, when base rates differ, calibration is compatible only with a substantially relaxed notion of balance, i.e., weighted sum of false positive and false negative rates is equal between the two groups, with at most one particular set of weights. These incompatibility findings indicates trade-offs among different fairness notions. Speicher et al.&nbsp;(2018) discuss the relationship between group-level fairness and individual-level fairness. They define a fairness index over a given set of predictions, which can be decomposed to the sum of between-group fairness and within-group fairness. They theoretically show that increasing between-group fairness (e.g., increase statistical parity) can come at a cost of decreasing within-group fairness.</p>
+</section>
+<section id="relationship-between-fairness-and-predictive-performance" class="level3">
+<h3 class="anchored" data-anchor-id="relationship-between-fairness-and-predictive-performance">Relationship between Fairness and Predictive Performance</h3>
+<p>In general, a discrimination-aware prediction problem is formulated as a constrained optimization task, which aims to achieve highest accuracy possible, without violating fairness constraints. There is evidence suggesting trade-offs between fairness and predictive performance. Calders et al, (2009) considered the problem of building a binary classifier where the label is correlated with the protected attribute, and proved a trade-off between accuracy and level of dependency between predictions and the protected attribute. Corbett-Davies et al.&nbsp;(2017) demonstrates that maximizing predictive accuracy with a single threshold (that applies to both groups) typically violates fairness constraints. Conversely, fairness-preserving models with group-specific thresholds typically come at the cost of overall accuracy. In essence, the trade-off is again due to different base rates in the two groups. Hardt et al.&nbsp;(2016) proposed algorithms to determine group-specific thresholds that maximize predictive performance under balance constraints, and similarly demonstrated the trade-off between predictive performance and fairness. Speicher et al.&nbsp;(2018) showed that a classifier achieve optimal fairness (based on their definition of a fairness index) can have arbitrarily bad accuracy performance.</p>
+<p>Importantly, such trade-off does not mean that one needs to build inferior predictive models in order to achieve fairness goals. In particular, in Hardt et al.&nbsp;(2016), the classifier is still built to be as accurate as possible, and fairness goals are achieved by adjusting classification thresholds. In the same vein, Kleinberg et al.&nbsp;(2018a) proved that “an equity planner” with fairness goals should still build the same classifier as one would without fairness concerns, and adjust decision thresholds. Moreover, such a classifier should take into account the protected attribute (i.e., group identifier) in order to produce correct predicted probabilities.</p>
+<p>Another interesting dynamic is that discrimination-aware classifiers may not always be fair on new, unseen data (similar to the over-fitting problem). Cotter et al.&nbsp;(2018) discuss this issue, using ideas from hyper-parameter tuning.</p>
+</section>
+</section>
+<section id="addressing-algorithmic-bias" class="level2">
+<h2 class="anchored" data-anchor-id="addressing-algorithmic-bias">Addressing Algorithmic Bias</h2>
+<section id="measurement-and-detection" class="level3">
+<h3 class="anchored" data-anchor-id="measurement-and-detection">Measurement and Detection</h3>
+<p>Both Zliobaite (2015) and Romei et al.&nbsp;(2013) surveyed relevant measures of fairness or discrimination. One may compare the number or proportion of instances in each group classified as certain class. Sometimes, the measure of discrimination is mandated by law. For instance, the <em>four-fifths rule</em> (Romei et al.&nbsp;2013) in hiring context requires the job selection rate for the protected group is at least 80% that of the other group. It is a measure of disparate impact.</p>
+<p>If fairness or discrimination is measured as the number or proportion of instances in each group classified to a certain class, then one can use standard statistical tests (e.g., two sample t-test) to check if there is systematic/statistically significant differences between groups. Zliobaite (2015) review a large number of such measures, and Pedreschi et al.&nbsp;(2012) discuss relationships among different measures.</p>
+<p>In the particular context of machine learning, previous definitions of fairness offer straightforward measures of discrimination. For instance, the degree of balance of a binary classifier for the positive class can be measured as the difference between average probability assigned to people with positive class in the two groups. In addition, Pedreschi et al.&nbsp;(2009) developed several metrics to quantify the degree of discrimination in association rules (or IF-THEN decision rules in general). Two similar papers are Ruggieri et al.&nbsp;(2010ab), which also associate these discrimination metrics with legal concepts, such as affirmative action. See also Kamishima et al.&nbsp;(2012) for more discussions on measuring different types of discrimination in IF-THEN rules. Speicher et al.&nbsp;(2018) define a <em>fairness index</em> that can quantify the degree of fairness for any two prediction algorithms. Their definition is rooted in the inequality index literature in economics. Yang and Stoyanovich (2016) develop measures for rank-based prediction outputs to quantify/detect statistical disparity.</p>
+<p>Specialized methods have been proposed to detect the existence and magnitude of discrimination in data. Adebayo and Kagal (2016) use the orthogonal projection method to create multiple versions of the original dataset, each one removes an attribute and makes the remaining attributes orthogonal to the removed attribute. Then, the model is deployed on each generated dataset, and the decrease in predictive performance measures the dependency between prediction and the removed attribute. Zhang and Neil (2016) treat this as an anomaly detection task, and develop subset scan algorithms to find subgroups that suffer from significant disparate mistreatment.</p>
+<p>Discrimination has been detected in several real-world datasets and cases. For example, Kamiran et al.&nbsp;(2012) identified discrimination in criminal records where people from minority ethnic groups were assigned higher risk scores. Caliskan et al.&nbsp;(2017) detect and document a variety of implicit biases in natural language, as picked up by trained word embeddings. Chouldechova (2017) showed the existence of disparate impact using data from the COMPAS risk tool.</p>
+</section>
+<section id="preventionmitigation" class="level3">
+<h3 class="anchored" data-anchor-id="preventionmitigation">Prevention/Mitigation</h3>
+<p>Techniques to prevent/mitigate discrimination in machine learning can be put into three categories (Zliobaite 2015; Romei et al.&nbsp;2013): (1) <strong>data pre-processing</strong>, (2) <strong>algorithm modification</strong>, and (3) <strong>model post-processing</strong>.</p>
+<p><strong>Data pre-processing</strong> tries to manipulate training data to get rid of discrimination embedded in the data.</p>
+<ul>
+<li>Calders et al, (2009) propose two methods of cleaning the training data: (1) flipping some labels, and (2) assign unique weight to each instance, with the objective of removing dependency between outcome labels and the protected attribute. The first approach of flipping training labels is also discussed in Kamiran and Calders (2009), and Kamiran and Calders (2012).</li>
+<li>Hajian et al.&nbsp;(2011) discuss a data transformation method to remove discrimination learned in IF-THEN decision rules. The high-level idea is to manipulate the confidence scores of certain rules.</li>
+<li>Zemel et al.&nbsp;(2013) propose to learn a set of intermediate representation of the original data (as a multinomial distribution) that achieves statistical parity, minimizes representation error, and maximizes predictive accuracy.</li>
+<li>Mancuhan and Clifton (2014) build non-discriminatory Bayesian networks. Their algorithm depends on deleting the protected attribute from the network, as well as pre-processing the data to remove discriminatory instances.</li>
+<li>Bolukbasi et al.&nbsp;(2016) discuss de-biasing technique to remove stereotypes in word embeddings learned from natural language.</li>
+<li>Celis et al.&nbsp;(2016) study the problem of not only removing bias in the training data, but also maintain its diversity, i.e., ensure the de-biased training data is still representative of the feature space.</li>
+<li>Lum and Johndrow (2016) propose to de-bias the data by transform the entire feature space to be orthogonal to the protected attribute.</li>
+<li>Bower et al.&nbsp;(2018) use a regression-based method to transform the (numeric) label so that the transformed label is independent of the protected attribute conditioning on other attributes. This addresses conditional discrimination.</li>
+</ul>
+<p><strong>Algorithm modification</strong> directly modifies machine learning algorithms to take into account fairness constraints. A general principle is that simply removing the protected attribute from training data is not enough to get rid of discrimination, because other correlated attributes can still bias the predictions. This problem is known as <strong>redlining</strong>.</p>
+<ul>
+<li>Calders and Verwer (2010) propose to modify naive Bayes model in three different ways: (i) change the conditional probability of a class given the protected attribute; (ii) train two separate naive Bayes classifiers, one for each group, using data only in each group; and (iii) try to estimate a “latent class” free from discrimination.</li>
+<li>Kamiran et al.&nbsp;(2010) develop a discrimination-aware decision tree model, where the criteria to select best split takes into account not only homogeneity in labels but also heterogeneity in the protected attribute in the resulting leaves.</li>
+<li>Kamishima et al.&nbsp;(2011) use regularization technique to mitigate discrimination in logistic regressions. The regularization term increases as the degree of statistical disparity becomes larger, and the model parameters are estimated under constraint of such regularization.</li>
+<li>Dwork et al.&nbsp;(2011) formulate a linear program to optimize a loss function <em>subject to</em> individual-level fairness constraints. They define a distance score for pairs of individuals, and the outcome difference between a pair of individuals is bounded by their distance. A follow up work, Kim et al.&nbsp;(2018), relaxes the knowledge requirement on the distance metric.</li>
+<li>Feldman et al.&nbsp;(2014) specifically designed a method to remove disparate impact defined by the four-fifths rule, by formulating the machine learning problem as a constraint optimization task.</li>
+<li>Fish et al.&nbsp;(2014) adapt AdaBoost algorithm to optimize simultaneously for accuracy and fairness measures.</li>
+<li>Bechavod and Ligett (2017) address the disparate mistreatment notion of fairness by formulating the machine learning problem as a optimization over not only accuracy but also minimizing differences between false positive/negative rates across groups.</li>
+<li>Berk et al.&nbsp;(2017) apply regularization method to regression models. The key contribution of their paper is to propose new regularization terms that account for both individual and group fairness.</li>
+<li>Grgic-Hlaca et al.&nbsp;(2017) propose to build ensemble of classifiers to achieve fairness goals. Interestingly, they show that an ensemble of unfair classifiers can achieve fairness, and the ensemble approach mitigates the trade-off between fairness and predictive performance.</li>
+<li>Dwork et al.&nbsp;(2017) develop a decoupling technique to train separate models using data only from each group, and then combine them in a way that still achieves between-group fairness.</li>
+<li>Agarwal et al.&nbsp;(2018) reduces the fairness problem in classification (in particular under the notions of statistical parity and equalized odds) to a cost-aware classification problem.</li>
+</ul>
+<p><strong>Model post-processing</strong> changes how the predictions are made from a model in order to achieve fairness goals.</p>
+<ul>
+<li>Kamiran et al.&nbsp;(2010) propose to re-label the instances in the leaf nodes of a decision tree, with the objective to minimize accuracy loss and reduce discrimination. The predictions on unseen data are made not based on majority rule with the re-labeled leaf nodes.</li>
+</ul>
+</section>
+</section>
+<section id="other-thoughts" class="level2">
+<h2 class="anchored" data-anchor-id="other-thoughts">Other Thoughts</h2>
+<ol type="1">
+<li><p>The issue of algorithmic bias is closely related to the interpretability of algorithmic predictions. By making a prediction model more interpretable, there may be a better chance of detecting bias in the first place. Meanwhile, model interpretability affects users’ trust toward its predictions (Ribeiro et al.&nbsp;2016). Regulations have also been put forth that create “right to explanation” and restrict predictive models for individual decision-making purposes (Goodman and Flaxman 2016).</p></li>
+<li><p>The design of discrimination-aware predictive algorithms is only part of the design of a discrimination-aware decision-making tool, the latter of which needs to take into account various other technical and behavioral factors. Such a gap is discussed in Veale et al.&nbsp;(2018)</p></li>
+</ol>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Adebayo, J., &amp; Kagal, L. (2016). Iterative Orthogonal Feature Projection for Diagnosing Bias in Black-Box Models, 37. Retrieved from http://arxiv.org/abs/1611.04967</li>
+<li>Agarwal, A., Beygelzimer, A., Dudík, M., Langford, J., &amp; Wallach, H. (2018). A Reductions Approach to Fair Classification.</li>
+<li>Barocas, S., &amp; Selbst, A. (2016). Big Data’s Disparate Impact. <em>California Law Review</em>, 104(1), 671–729.</li>
+<li>Bechavod, Y., &amp; Ligett, K. (2017). Penalizing Unfairness in Binary Classification. Retrieved from http://arxiv.org/abs/1707.00044</li>
+<li>Berk, R., Heidari, H., Jabbari, S., Joseph, M., Kearns, M., Morgenstern, J., … Roth, A. (2017). A Convex Framework for Fair Regression, 1–5. Retrieved from http://arxiv.org/abs/1706.02409</li>
+<li>Bolukbasi, T., Chang, K.-W., Zou, J., Saligrama, V., &amp; Kalai, A. (2016). Debiasing Word Embedding, (Nips), 1–9.</li>
+<li>Bower, A., Niss, L., Sun, Y., &amp; Vargo, A. (2018). Debiasing representations by removing unwanted variation due to protected attributes. Retrieved from https://www.fatml.org/media/documents/debiasing_representations.pdf</li>
+<li>Calders, T., &amp; Verwer, S. (2010). Three naive Bayes approaches for discrimination-free classification. <em>Data Mining and Knowledge Discovery</em>, 21(2), 277–292.</li>
+<li>Calders, T., Kamiran, F., &amp; Pechenizkiy, M. (2009). Building classifiers with independency constraints. ICDM Workshops 2009 - IEEE International Conference on Data Mining, (December), 13–18.</li>
+<li>Calders, T., Karim, A., Kamiran, F., Ali, W., &amp; Zhang, X. (2013). Controlling attribute effect in linear regression. Proceedings - IEEE International Conference on Data Mining, <em>ICDM</em>, (1), 71–80.</li>
+<li>Caliskan, A., Bryson, J. J., &amp; Narayanan, A. (2017). Semantics derived automatically from language corpora contain human-like biases. <em>Science</em>, 356(6334), 183–186.</li>
+<li>Celis, L. E., Deshpande, A., Kathuria, T., &amp; Vishnoi, N. K. (2016). How to be Fair and Diverse? Retrieved from http://arxiv.org/abs/1610.07183</li>
+<li>Chouldechova, A. (2017). Fair Prediction with Disparate Impact : A Study of Bias in Recidivism Prediction Instruments. Big Data, 5(2), 153–163.</li>
+<li>Corbett-Davies, S., Pierson, E., Feller, A., Goel, S., &amp; Huq, A. (2017). Algorithmic decision making and the cost of fairness. <a href="https://arxiv.org/pdf/1701.08230.pdf">arXiv</a></li>
+<li>Cotter, A., Gupta, M., Jiang, H., Srebro, N., Sridharan, K., &amp; Wang, S. (2018). Training Fairness-Constrained Classifiers to Generalize.</li>
+<li>Custers, B. (2013). Discrimination and Privacy in the information society. Discrimination and Privacy in the Information Society (Vol. 3).</li>
+<li>Dwork, C., Hardt, M., Pitassi, T., Reingold, O., &amp; Zemel, R. (2011). Fairness Through Awareness. <a href="https://arxiv.org/pdf/1104.3913.pdf">arXiv</a></li>
+<li>Dwork, C., Immorlica, N., Kalai, A. T., &amp; Leiserson, M. (2017). Decoupled classifiers for fair and efficient machine learning.</li>
+<li>Feldman, M., Friedler, S., Moeller, J., Scheidegger, C., &amp; Venkatasubramanian, S. (2014). Certifying and removing disparate impact. <a href="https://arxiv.org/pdf/1412.3756.pdf">arXiv</a></li>
+<li>Fish, B., Kun, J., &amp; Lelkes, A. (2014). Fair Boosting : a Case Study.</li>
+<li>Goodman, B., &amp; Flaxman, S. (2016). European Union regulations on algorithmic decision-making and a “right to explanation,” 1–9.</li>
+<li>Grgic-Hlaca, N., Zafar, M. B., Gummadi, K. P., &amp; Weller, A. (2017). On Fairness, Diversity and Randomness in Algorithmic Decision Making.</li>
+<li>Hajian, S., Domingo-Ferrer, J., &amp; Martinez-Balleste, A. (2011). Discrimination prevention in data mining for intrusion and crime detection. 2011 IEEE Symposium on Computational Intelligence in Cyber Security, 47–54.</li>
+<li>Hardt, M., Price, E., &amp; Srebro, N. (2016). Equality of Opportunity in Supervised Learning, (Nips).</li>
+<li>Kamiran, F., &amp; Calders, T. (2009). Classifying without discriminating. 2009 2nd International Conference on Computer, Control and Communication, IC4 2009.</li>
+<li>Kamiran, F., &amp; Calders, T. (2012). Data preprocessing techniques for classification without discrimination. Knowledge and Information Systems (Vol. 33).</li>
+<li>Kamiran, F., Calders, T., &amp; Pechenizkiy, M. (2010). Discrimination aware decision tree learning. Proceedings - IEEE International Conference on Data Mining, ICDM, 869–874.</li>
+<li>Kamiran, F., Karim, A., Verwer, S., &amp; Goudriaan, H. (2012). Classifying socially sensitive data without discrimination: An analysis of a crime suspect dataset. In Proceedings - 12th IEEE International Conference on Data Mining Workshops, ICDMW 2012 (pp.&nbsp;370–377).</li>
+<li>Kamiran, F., Žliobaite, I., &amp; Calders, T. (2013). Quantifying explainable discrimination and removing illegal discrimination in automated decision making. Knowledge and Information Systems (Vol. 35).</li>
+<li>Kamishima, T., Akaho, S., &amp; Sakuma, J. (2011). Fairness-aware learning through regularization approach. Proceedings - IEEE International Conference on Data Mining, ICDM, 643–650.</li>
+<li>Kamishima, T., Akaho, S., Asoh, H., &amp; Sakuma, J. (2012). Considerations on fairness-aware data mining. Proceedings - 12th IEEE International Conference on Data Mining Workshops, ICDMW 2012, 378–385.</li>
+<li>Kim, M. P., Reingold, O., &amp; Rothblum, G. N. (2018). Fairness Through Computationally-Bounded Awareness. https://doi.org/10.1145/2090236.2090255</li>
+<li>Kleinberg, J., &amp; Raghavan, M. (2018b). Selection Problems in the Presence of Implicit Bias. <a href="https://arxiv.org/pdf/1801.03533.pdf">arXiv</a></li>
+<li>Kleinberg, J., Lakkaraju, H., Leskovec, J., Ludwig, J., &amp; Mullainathan, S. (2017). Human decisions and machine predictions. <em>The quarterly journal of economics</em>, 133(1), 237-293.</li>
+<li>Kleinberg, J., Ludwig, J., Mullainathan, S., &amp; Rambachan, A. (2018a). Algorithmic Fairness. <em>AEA Papers and Proceedings</em>, 108, 22–27.</li>
+<li>Kleinberg, J., Mullainathan, S., &amp; Raghavan, M. (2016). Inherent Trade-Offs in the Fair Determination of Risk Scores. <a href="https://arxiv.org/pdf/1609.05807.pdf">arXiv</a></li>
+<li>Lum, K., &amp; Johndrow, J. (2016). A statistical framework for fair predictive algorithms, 1–6. Retrieved from http://arxiv.org/abs/1610.08077</li>
+<li>Mancuhan, K., &amp; Clifton, C. (2014). Combating discrimination using Bayesian networks. Artificial Intelligence and Law, 22(2), 211–238.</li>
+<li>Pedreschi, D., Ruggieri, S., &amp; Turini, F. (2009). Measuring Discrimination in Socially-Sensitive Decision Records. Proceedings of the 2009 SIAM International Conference on Data Mining, 581–592.</li>
+<li>Pedreschi, D., Ruggieri, S., &amp; Turini, F. (2012). A study of top-k measures for discrimination discovery. Proceedings of the 27th Annual ACM Symposium on Applied Computing.</li>
+<li>Pleiss, G., Raghavan, M., Wu, F., Kleinberg, J., &amp; Weinberger, K. Q. (2017). On Fairness and Calibration. <a href="http://arxiv.org/abs/1709.02012">arXiv</a></li>
+<li>Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2016). “Why Should I Trust You?”: Explaining the Predictions of Any Classifier. KDD 2016.</li>
+<li>Romei, A., &amp; Ruggieri, S. (2013). A multidisciplinary survey on discrimination analysis. <em>Knowledge Engineering Review</em>, 29(5), 582–638.</li>
+<li>Ruggieri, S., Pedreschi, D., &amp; Turini, F. (2010a). Integrating induction and deduction for finding evidence of discrimination. Artificial Intelligence and Law, 18(1), 1–43.</li>
+<li>Ruggieri, S., Pedreschi, D., &amp; Turini, F. (2010b). Data mining for discrimination discovery. ACM Transactions on Knowledge Discovery from Data, 4(2), 1–40.</li>
+<li>Speicher, T., Heidari, H., Grgic-Hlaca, N., Gummadi, K. P., Singla, A., Weller, A., &amp; Zafar, M. B. (2018, July). A Unified Approach to Quantifying Algorithmic Unfairness: Measuring Individual &amp;Group Unfairness via Inequality Indices. In Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining (pp.&nbsp;2239-2248). ACM.</li>
+<li>Veale, M., Van Kleek, M., &amp; Binns, R. (2018). Fairness and Accountability Design Needs for Algorithmic Support in High-Stakes Public Sector Decision-Making. CHI Proceeding, 1–14.</li>
+<li>Yang, K., &amp; Stoyanovich, J. (2016). Measuring Fairness in Ranked Outputs.</li>
+<li>Zafar, M. B., Valera, I., Rodriguez, M. G., &amp; Gummadi, K. P. (2016). Fairness Beyond Disparate Treatment &amp; Disparate Impact: Learning Classification without Disparate Mistreatment.</li>
+<li>Zemel, R. S., Wu, Y., Swersky, K., Pitassi, T., &amp; Dwork, C. (2013). Learning Fair Representations. Proceedings of the 30th International Conference on Machine Learning, 28, 325–333.</li>
+<li>Zhang, Z., &amp; Neill, D. B. (2016). Identifying Significant Predictive Bias in Classifiers, (June), 1–5. Retrieved from http://arxiv.org/abs/1611.08292</li>
+<li>Zliobaite, I. (2015). A survey on measuring indirect discrimination in machine learning. <a href="https://arxiv.org/pdf/1511.00148.pdf">arXiv</a></li>
+<li>Zliobaite, I. (2015). On the relation between accuracy and fairness in binary classification. <a href="https://arxiv.org/pdf/1505.05723.pdf">arXiv</a></li>
+<li>Zliobaite, I., Kamiran, F., &amp; Calders, T. (2011). Handling conditional discrimination. Proceedings - IEEE International Conference on Data Mining, ICDM, (1), 992–1001.</li>
+</ul>
+</section>
+<section id="other-resources" class="level2">
+<h2 class="anchored" data-anchor-id="other-resources">Other Resources</h2>
+<p><a href="https://www.youtube.com/channel/UC6f1sYAoj6_sxF-lhroS6SQ">Emergence of Intelligent Machines</a>: a series of talks on algorithmic fairness, biases, interpretability, etc.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

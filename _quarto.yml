@@ -1,0 +1,18 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Mochen's Blog"
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/mochenyang
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+
