@@ -2,7 +2,6 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/2024-10-15-Recommendation-Data-Scientist/2024-10-15-Recommendation-Data-Scientist.html",
       "/posts/2024-08-15-Reading-List/2024-08-15-Reading-List.html",
       "/posts/2024-07-10-Shrinkage/2024-07-10-Shrinkage.html",
       "/posts/2023-12-26-Potential-Outcome/2023-12-26-Potential-Outcome.html",
@@ -12,6 +11,7 @@
       "/posts/2022-05-24-Logit-Regression/2022-05-24-Logit-Regression.html",
       "/posts/2022-04-11-LSTM-Gradient/2022-04-11-LSTM-Gradient.html",
       "/posts/2022-03-23-PDP-M-ALE/2022-03-23-PDP-M-ALE.html",
+      "/posts/2022-02-10-Rejections/2022-02-10-Rejections.html",
       "/posts/2022-01-10-ForestIV/2022-01-10-ForestIV.html",
       "/posts/2022-01-05-Natural-Experiments/2022-01-05-Natural-Experiments.html",
       "/posts/2021-12-27-Random-Me/2021-12-27-Random-Me.html",
