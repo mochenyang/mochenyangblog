@@ -123,6 +123,7 @@ print("tokenized output sequence:", train_dataset[0][1])
 
 ## Constructing the Transformer Model
 We are now ready to construct the transformer model. This include several modules:
+
 - A ```TokenEmbedding``` class that projects each token to its (trainable) embedding representation;
 - A ```PositionalEncoding``` class that adds the positional encoding to the token embeddings;
 - A ```Seq2SeqTransformer``` that implements the actual transformer architecture.

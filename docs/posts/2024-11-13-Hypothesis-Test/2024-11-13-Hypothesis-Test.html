@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2024-08-15">
-<meta name="description" content="A collection of timeless classics">
+<meta name="dcterms.date" content="2024-11-13">
+<meta name="description" content="A casual tour through hypothesis testing, p-value, and R. A. Fisher">
 
-<title>The Reading List – Mochen’s Blog</title>
+<title>Why Are Null Hypotheses Often about Equality? – Mochen’s Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,6 +69,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -106,14 +135,15 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">The Reading List</h1>
+      <h1 class="title">Why Are Null Hypotheses Often about Equality?</h1>
                   <div>
         <div class="description">
-          A collection of timeless classics
+          A casual tour through hypothesis testing, p-value, and R. A. Fisher
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">research</div>
+                <div class="quarto-category">causal-inference</div>
+                <div class="quarto-category">exposition</div>
               </div>
                   </div>
   </div>
@@ -125,7 +155,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 15, 2024</p>
+        <p class="date">November 13, 2024</p>
       </div>
     </div>
     
@@ -136,8 +166,17 @@ ul.task-list li input[type="checkbox"] {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-question" id="toc-the-question" class="nav-link active" data-scroll-target="#the-question">The Question</a></li>
+  <li><a href="#the-p-value-detour" id="toc-the-p-value-detour" class="nav-link" data-scroll-target="#the-p-value-detour">The <span class="math inline">\(p\)</span>-Value Detour</a></li>
+  <li><a href="#more-generally" id="toc-more-generally" class="nav-link" data-scroll-target="#more-generally">More Generally</a></li>
+  <li><a href="#r.-a.-fisher" id="toc-r.-a.-fisher" class="nav-link" data-scroll-target="#r.-a.-fisher">R. A. Fisher</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -146,18 +185,75 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>This is a repository of articles and books that I frequently come back to. They are formative in my understanding of science and research.</p>
+<blockquote class="blockquote">
+<p><strong>Disclaimer</strong>: the topic discussed in this blog post would most likely seem completely obvious / trivial to statisticians or econometricians. However, it may not be so to many people (myself included) who apply statistics as a tool and have not studied its underlying mathematical principles in a systematic manner.</p>
+</blockquote>
+<section id="the-question" class="level1">
+<h1>The Question</h1>
+<p>Have you ever wondered: <strong>why, in so many statistical tests, the null hypotheses take the form of some sort of equality?</strong> This is especially evident for two-sided tests. For example:</p>
 <ul>
-<li><a href="https://www.science.org/doi/abs/10.1126/science.177.4047.393">More is Different (P.W. Anderson)</a>: a pure reductionist view of science is incomplete. Just because a larger entity is “made up of” smaller entities does not mean that everything there is to know about the larger entity can be derived purely from the properties of the constituent entities. More is different.</li>
-<li><a href="https://www.science.org/doi/10.1126/science.146.3642.347">Strong Inference (John R. Platt)</a>: a good theory is one that can be falsified with critical experiments.</li>
-<li><a href="https://www.tandfonline.com/doi/full/10.1080/10618600.2017.1384734">50 Years of Data Science (David Donoho)</a></li>
-<li><a href="https://darioamodei.com/machines-of-loving-grace">Machines of Loving Grace (Dario Amodei)</a>: what would our lives look like if powerful AI successfully transforms the world.</li>
-<li><a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">The Bitter Lesson (Richard Sutton)</a>: “General methods that leverage computation are ultimately the most effective, and by a large margin.”</li>
+<li>In a two-sample <span class="math inline">\(t\)</span> test comparing two means <span class="math inline">\(\mu_1\)</span> and <span class="math inline">\(\mu_2\)</span>, the null hypothesis is <span class="math inline">\(\mu_1 = \mu_2\)</span>;</li>
+<li>In a one-sample <span class="math inline">\(t\)</span> test of whether a mean <span class="math inline">\(\mu_1\)</span> is significantly different 0, the null hypothesis is <span class="math inline">\(\mu_1 = 0\)</span>;</li>
+<li>In an <span class="math inline">\(F\)</span> test of regression coefficients, the null hypothesis is <span class="math inline">\(\beta_0 = \beta_1 = \dots = \beta_k = 0\)</span>;</li>
+<li>In a <span class="math inline">\(\chi^2\)</span> test of frequency, the null hypothesis is the observed frequency matches expected frequency;</li>
+<li>In a Pearson’s correlation test, the null hypothesis is zero correlation (i.e., <span class="math inline">\(\rho = 0\)</span>);</li>
+<li>… (many others)</li>
 </ul>
+<p>More generally, the question is, when we test for a certain hypothesis (e.g., “whether the means of two samples are equal to each other or not”), why is the null hypothesis typically chosen as representing the case of equality rather than case of inequality?</p>
+<p>Regarding this question, I have heard at least three answers from various sources:</p>
+<ol type="1">
+<li>This is just the way it is. Smart people who designed the test decided that’s the null hypothesis.</li>
+<li>The null hypothesis should be chosen as the hypothesis you <em>want</em> to reject.</li>
+<li>No it doesn’t have to be equality (i.e., it can be inequality without causing any problems). It’s just a habit.</li>
+</ol>
+<p>Answer #1 is clearly unsatisfactory. Answer #2, believe it or not, is actually what I was taught back in undergrad, and I didn’t question it for a long time. However, come to think of it, why would the formulation of null hypothesis have anything to do with what I “want” or “not want”? Finally, answer #3, as we will see by the end of this blog post, is simply not right.</p>
+</section>
+<section id="the-p-value-detour" class="level1">
+<h1>The <span class="math inline">\(p\)</span>-Value Detour</h1>
+<p>From a practical perspective, the tool (or rather, the quantity) to actually carry out hypothesis testing is the <span class="math inline">\(p\)</span>-value. Therefore, I argue that in order to truly answer the aforementioned question, one needs to really understand what <span class="math inline">\(p\)</span>-value represents.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>There have been a lot of criticisms about the arbitrariness of significance level (against which an empirical <span class="math inline">\(p\)</span>-value is compared to arrive at a conclusion). The problem of <span class="math inline">\(p\)</span>-hacking in scientific research has also given <span class="math inline">\(p\)</span>-value a “bad name” and an “evil vibe”. However, these problems are more related to misuses / mis-interpretation of <span class="math inline">\(p\)</span>-value; as a statistical quantity, <span class="math inline">\(p\)</span>-value itself is well-defined (and I would argue represents a quite clever idea).</p>
+<p>In particular, <span class="math inline">\(p\)</span>-value is the <strong>probability of getting a test statistic that is at least as extreme as what you actually observe, if the null hypothesis is true</strong>. Take a one-sample <span class="math inline">\(t\)</span> test as an illustration here. The test statistic is the <span class="math inline">\(t\)</span> statistic (namely, sample mean devided by sample standard error). Let’s say the (empirical) test statistic we compute on the actual sample we have is <span class="math inline">\(\widehat{TS}\)</span>, then in a two-sided test with null hypothesis of zero mean, the <span class="math inline">\(p\)</span>-value is simply</p>
+<p><span class="math display">\[
+\Pr(|TS| \geq |\widehat{TS}| ~ \vert \mu = 0)
+\]</span></p>
+<p>More generally, if we give up a little bit of mathematical rigor (in exchange for expositional conciseness), the <span class="math inline">\(p\)</span>-value can be written as something like</p>
+<p><span class="math display">\[
+\Pr(TS \text{ being equal or more extreme than } \widehat{TS} ~ \vert H_0 \text{ is true})
+\]</span></p>
+<p>Now, to compute such a probability, one would need to characterize the distribution of the test statistic under <span class="math inline">\(H_0\)</span> (specifically the CDF of that distribution). Importantly, this is a <strong>conditional distribution</strong>, i.e., the distribution of test statistic conditional on <span class="math inline">\(H_0\)</span> being true.</p>
+<p>And right here is a key reason for why the null hypothesis is so often an equality. If <span class="math inline">\(H_0\)</span> is complicated (or rather, ambiguous), it becomes very difficulty to derive or even estimate such a conditional distribution. However, under an exact form of <span class="math inline">\(H_0\)</span> (such as an equality), one can usually derive a tractable distribution for the test statistic.</p>
+<p><strong>Remark</strong>: all of the illustrative examples from the previous sections are based on two-tail tests (where <span class="math inline">\(H_0\)</span> is exactly an equality). What about <strong>one-tail tests</strong>? For example, the null hypothesis for a one-tail <span class="math inline">\(t\)</span> test is often written as <span class="math inline">\(H_0: ~ \mu \leq 0\)</span> (and the corresponding alternative hypothesis would be <span class="math inline">\(H_1: ~ \mu &gt; 0\)</span>). However, this is more of a notational choice. When calculating the <span class="math inline">\(p\)</span>-value, one actually uses the <strong>boundary value</strong> under the null hypothesis (which in this case is again 0) to derive the test statistic distribution.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+</section>
+<section id="more-generally" class="level1">
+<h1>More Generally</h1>
+<p>Once we understand the reason behind the prevalence of null hypotheses as equality, we can also make sense of the fact that, more generally, it’s not “equality” itself that is important. For example, think about the following statistical tests:</p>
+<ul>
+<li>Durbin–Wu–Hausman specification test (e.g., comparing a fixed effect estimator vs.&nbsp;a random effect estimator): the null hypothesis is that both estimators are consistent (and one is more efficient);</li>
+<li>Shapiro-Wilk Test normality test: the null hypothesis is that data is normally distributed;</li>
+<li>Variance Inflation Factor (VIF) test: the null hypothesis is that there is no multi-collinearity;</li>
+<li>Cook’s Distance / leverage test: the null hypothesis is that there is no influential (high leverage) observation.</li>
+</ul>
+<p>In these examples, the null hypotheses are not exactly in the form of equality (although they might still be at a mathematical level). However, they are all formulated in a way that allow for precise characterization of the test statistic distributions. In other words, what’s important is that the null hypothesis is chosen to be <em>exact / clearly defined / tractable</em> version of the hypothesis one is seeking to test (and equality fits these criteria very well).</p>
+</section>
+<section id="r.-a.-fisher" class="level1">
+<h1>R. A. Fisher</h1>
+<p>We’ve got <a href="https://en.wikipedia.org/wiki/Ronald_Fisher">Fisher</a> to thank for all of the above, who formalized the idea of <span class="math inline">\(p\)</span>-value in hypothesis testing. In fact, he originally proposed using 0.05 as a significance cutoff in his <a href="https://en.wikipedia.org/wiki/Statistical_Methods_for_Research_Workers">Statistical Methods for Research Workers</a>.</p>
+<p>So, in closing, it seems only fitting to quote Fisher. From his 1935 book <a href="https://en.wikipedia.org/wiki/The_Design_of_Experiments">The Design of Experiments</a>, in the context of the famous <a href="https://en.wikipedia.org/wiki/Lady_tasting_tea">“lady tasting tea” experiment</a>, Fisher succinctly laid out everything I’ve been babbling for this entire blog.</p>
+<blockquote class="blockquote">
+<p>It might be argued that if an experiment can disprove the hypothesis that the subject possesses no sensory discrimination between two different sorts of object, it must therefore be able to prove the opposite hypothesis, that she can make some such discrimina tion. But this last hypothesis, however reasonable or true it may be, is ineligible as a null hypothesis to be tested by experiment, because it is inexact. If it were asserted that the subject would never be wrong in her judgments we should again have an exact hypothesis, and it is easy to see that this hypothesis could be disproved by a single failure, but could never be proved by any finite amount of experimentation. <strong>It is evident that the null hypothesis must be exact, that is free from vagueness and ambiguity, because it must supply the basis of the “problem of distribution,” of which the test of significance is the solution.</strong></p>
+</blockquote>
 
 
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>This is part of motivation for writing this blog post. Students learning applied statistics routinely find <span class="math inline">\(p\)</span>-values hard to understand.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is also the reason why the one-tail <span class="math inline">\(p\)</span>-value is exactly half of the two-tail <span class="math inline">\(p\)</span>-value, if the test statistic distribution is symmetric.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
