@@ -3,7 +3,6 @@ categories:
 - research
 date: '2022-02-10'
 description: A Cynical View of Academic Publishing
-draft: 'true'
 title: A Tale of Four Rejections
 toc: true
 
